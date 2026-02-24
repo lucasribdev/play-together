@@ -6,8 +6,8 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import Header from "../components/Header";
-
+import { Gamepad2 } from "lucide-react";
+import Header from "@/components/Header";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import appCss from "../styles.css?url";
@@ -48,8 +48,25 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				<TanStackQueryProvider>
-					<Header />
-					{children}
+					<div className="min-h-screen flex flex-col">
+						<Header />
+						<main className="flex-grow">{children}</main>
+						<footer className="border-t border-border-dark py-12 mt-20">
+							<div className="max-w-7xl mx-auto px-4 text-center space-y-4">
+								<div className="flex items-center justify-center gap-2">
+									<div className="w-6 h-6 bg-brand-primary rounded flex items-center justify-center">
+										<Gamepad2 className="text-black w-4 h-4" />
+									</div>
+									<span className="text-lg font-bold tracking-tighter">
+										JogaJunto
+									</span>
+								</div>
+								<p className="text-gray-500 text-sm">
+									&copy; 2026 JogaJunto. Feito para jogadores, por jogadores.
+								</p>
+							</div>
+						</footer>
+					</div>
 					<TanStackDevtools
 						config={{
 							position: "bottom-right",
