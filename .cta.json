@@ -1,0 +1,22 @@
+{
+  "projectName": "play-together",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "includeExamples": false,
+  "tailwind": true,
+  "addOnOptions": {},
+  "envVarValues": {},
+  "git": true,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "biome",
+    "nitro",
+    "compiler",
+    "form",
+    "shadcn",
+    "tanstack-query"
+  ]
+}
