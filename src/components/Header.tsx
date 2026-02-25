@@ -23,13 +23,13 @@ export default function Header() {
 							Início
 						</Link>
 						<Link
-							to="/"
+							to="/games"
 							className="text-sm font-medium hover:text-brand-primary transition-colors"
 						>
 							Jogos
 						</Link>
 						<Link
-							to="/"
+							to="/profile"
 							className="text-sm font-medium hover:text-brand-primary transition-colors flex items-center gap-2"
 						>
 							<UserIcon className="w-4 h-4" /> Perfil
@@ -38,7 +38,7 @@ export default function Header() {
 
 					<div className="flex items-center gap-4">
 						<Link
-							to="/"
+							to="/create-listing"
 							className="btn-primary flex items-center gap-2 text-sm py-1.5"
 						>
 							<PlusCircle className="w-4 h-4" />

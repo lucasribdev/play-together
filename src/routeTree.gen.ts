@@ -9,14 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as GamesRouteImport } from './routes/games'
+import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiUserRouteImport } from './routes/api.user'
-import { Route as ApiListingsRouteImport } from './routes/api.listings'
-import { Route as ApiGamesRouteImport } from './routes/api.games'
+import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as GameIdRouteImport } from './routes/game.$id'
+import { Route as ApiUserRouteImport } from './routes/api/user'
+import { Route as ApiListingsRouteImport } from './routes/api/listings'
+import { Route as ApiGamesRouteImport } from './routes/api/games'
 
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesRoute = GamesRouteImport.update({
+  id: '/games',
+  path: '/games',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateListingRoute = CreateListingRouteImport.update({
+  id: '/create-listing',
+  path: '/create-listing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ListingIdRoute = ListingIdRouteImport.update({
+  id: '/listing/$id',
+  path: '/listing/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GameIdRoute = GameIdRouteImport.update({
+  id: '/game/$id',
+  path: '/game/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUserRoute = ApiUserRouteImport.update({
@@ -37,45 +67,128 @@ const ApiGamesRoute = ApiGamesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/create-listing': typeof CreateListingRoute
+  '/games': typeof GamesRoute
+  '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRoute
   '/api/listings': typeof ApiListingsRoute
   '/api/user': typeof ApiUserRoute
+  '/game/$id': typeof GameIdRoute
+  '/listing/$id': typeof ListingIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/create-listing': typeof CreateListingRoute
+  '/games': typeof GamesRoute
+  '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRoute
   '/api/listings': typeof ApiListingsRoute
   '/api/user': typeof ApiUserRoute
+  '/game/$id': typeof GameIdRoute
+  '/listing/$id': typeof ListingIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/create-listing': typeof CreateListingRoute
+  '/games': typeof GamesRoute
+  '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRoute
   '/api/listings': typeof ApiListingsRoute
   '/api/user': typeof ApiUserRoute
+  '/game/$id': typeof GameIdRoute
+  '/listing/$id': typeof ListingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/games' | '/api/listings' | '/api/user'
+  fullPaths:
+    | '/'
+    | '/create-listing'
+    | '/games'
+    | '/profile'
+    | '/api/games'
+    | '/api/listings'
+    | '/api/user'
+    | '/game/$id'
+    | '/listing/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/games' | '/api/listings' | '/api/user'
-  id: '__root__' | '/' | '/api/games' | '/api/listings' | '/api/user'
+  to:
+    | '/'
+    | '/create-listing'
+    | '/games'
+    | '/profile'
+    | '/api/games'
+    | '/api/listings'
+    | '/api/user'
+    | '/game/$id'
+    | '/listing/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/create-listing'
+    | '/games'
+    | '/profile'
+    | '/api/games'
+    | '/api/listings'
+    | '/api/user'
+    | '/game/$id'
+    | '/listing/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CreateListingRoute: typeof CreateListingRoute
+  GamesRoute: typeof GamesRoute
+  ProfileRoute: typeof ProfileRoute
   ApiGamesRoute: typeof ApiGamesRoute
   ApiListingsRoute: typeof ApiListingsRoute
   ApiUserRoute: typeof ApiUserRoute
+  GameIdRoute: typeof GameIdRoute
+  ListingIdRoute: typeof ListingIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games': {
+      id: '/games'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create-listing': {
+      id: '/create-listing'
+      path: '/create-listing'
+      fullPath: '/create-listing'
+      preLoaderRoute: typeof CreateListingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/listing/$id': {
+      id: '/listing/$id'
+      path: '/listing/$id'
+      fullPath: '/listing/$id'
+      preLoaderRoute: typeof ListingIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/game/$id': {
+      id: '/game/$id'
+      path: '/game/$id'
+      fullPath: '/game/$id'
+      preLoaderRoute: typeof GameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/user': {
@@ -104,9 +217,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CreateListingRoute: CreateListingRoute,
+  GamesRoute: GamesRoute,
+  ProfileRoute: ProfileRoute,
   ApiGamesRoute: ApiGamesRoute,
   ApiListingsRoute: ApiListingsRoute,
   ApiUserRoute: ApiUserRoute,
+  GameIdRoute: GameIdRoute,
+  ListingIdRoute: ListingIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
