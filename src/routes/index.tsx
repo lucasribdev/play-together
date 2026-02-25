@@ -101,7 +101,10 @@ function App() {
 					<h2 className="text-2xl font-bold flex items-center gap-2">
 						<Gamepad2 className="text-brand-primary" /> Jogos Populares
 					</h2>
-					<Link to="/" className="text-sm text-brand-primary hover:underline">
+					<Link
+						to="/games"
+						className="text-sm text-brand-primary hover:underline"
+					>
 						Ver todos
 					</Link>
 				</div>

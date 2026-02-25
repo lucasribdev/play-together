@@ -74,7 +74,11 @@ function GameDetails() {
 								))}
 							</div>
 						</div>
-						<Link to={`/`} className="btn-primary flex items-center gap-2">
+						<Link
+							to={`/create-listing`}
+							search={{ game: id }}
+							className="btn-primary flex items-center gap-2"
+						>
 							<PlusCircle className="w-5 h-5" /> Criar Anúncio
 						</Link>
 					</div>

@@ -1,9 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-	createFileRoute,
-	useLocation,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { MessageSquare, Server, Users } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
@@ -13,6 +9,9 @@ import { cn } from "@/lib/utils";
 import type { ListingType } from "@/types";
 
 export const Route = createFileRoute("/create-listing")({
+	validateSearch: (search) => ({
+		game: typeof search.game === "string" ? search.game : undefined,
+	}),
 	component: RouteComponent,
 });
 
@@ -21,14 +20,11 @@ function RouteComponent() {
 	const [type, setType] = useState<ListingType | null>(null);
 	const [selectedGame, setSelectedGame] = useState<string | null>(null);
 	const navigate = useNavigate();
-	const [searchParams] = useLocation().search
-		? [new URLSearchParams(useLocation().search)]
-		: [null];
+	const { game: searchGame } = Route.useSearch();
 
 	useEffect(() => {
-		const gameId = searchParams?.get("game");
-		if (gameId) setSelectedGame(gameId);
-	}, [searchParams]);
+		if (searchGame) setSelectedGame(searchGame);
+	}, [searchGame]);
 
 	const {
 		data: games,
@@ -40,9 +36,8 @@ function RouteComponent() {
 	});
 
 	const handleFinish = () => {
-		// Mock finish
 		alert("Anúncio criado com sucesso! (Simulação)");
-		navigate("/");
+		navigate({ to: "/" });
 	};
 
 	return (

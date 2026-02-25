@@ -148,14 +148,16 @@ code {
   }
 }
 
-.glass-panel {
-  @apply bg-card-dark/80 backdrop-blur-md border border-border-dark rounded-xl;
-}
+@layer components {
+  .glass-panel {
+    @apply bg-card-dark/80 backdrop-blur-md border border-border-dark rounded-xl;
+  }
 
-.btn-primary {
-  @apply bg-brand-primary text-black font-bold py-2 px-4 rounded-lg transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(0,255,136,0.4)] active:scale-95;
-}
+  .btn-primary {
+    @apply bg-brand-primary text-black font-bold py-2 px-4 rounded-lg transition-all hover:scale-105 hover:shadow-[0_0_15px_rgba(0,255,136,0.4)] active:scale-95;
+  }
 
-.btn-secondary {
-  @apply bg-transparent border border-brand-primary text-brand-primary font-bold py-2 px-4 rounded-lg transition-all hover:bg-brand-primary/10 active:scale-95;
+  .btn-secondary {
+    @apply bg-transparent border border-brand-primary text-brand-primary font-bold py-2 px-4 rounded-lg transition-all hover:bg-brand-primary/10 active:scale-95;
+  }
 }
