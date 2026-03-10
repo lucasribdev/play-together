@@ -4,8 +4,9 @@ export interface Game {
 	id: string;
 	name: string;
 	image: string;
-	description: string;
 	tags: string[];
+	released: string | null;
+	website: string;
 }
 
 export interface User {

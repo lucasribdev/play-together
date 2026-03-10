@@ -1,7 +1,39 @@
-import { Link } from "@tanstack/react-router";
-import { Gamepad2, PlusCircle, UserIcon } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Gamepad2, LogIn, LogOut, PlusCircle, UserIcon } from "lucide-react";
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function Header() {
+	const [isAuthLoading, setIsAuthLoading] = useState(false);
+	const [isSigningOut, setIsSigningOut] = useState(false);
+
+	const { isSessionLoading, session, signInWithDiscord, signOut } = useAuth();
+
+	const navigate = useNavigate();
+
+	const handleDiscordLogin = async () => {
+		if (isAuthLoading) return;
+		setIsAuthLoading(true);
+
+		const { error } = await signInWithDiscord("/");
+
+		if (error) {
+			// Fallback to auth route for a visible error state.
+			window.location.href = "?error=oauth_failed";
+			setIsAuthLoading(false);
+		}
+	};
+
+	const handleSignOut = async () => {
+		if (isSigningOut) return;
+		setIsSigningOut(true);
+		const { error } = await signOut();
+		if (!error) {
+			navigate({ to: "/" });
+		}
+		setIsSigningOut(false);
+	};
+
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-border-dark bg-bg-dark/80 backdrop-blur-md">
 			<nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,7 +43,7 @@ export default function Header() {
 							<Gamepad2 className="text-black w-5 h-5" />
 						</div>
 						<span className="text-xl font-bold tracking-tighter bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">
-							JogaJunto
+							GameBond
 						</span>
 					</Link>
 
@@ -28,22 +60,47 @@ export default function Header() {
 						>
 							Jogos
 						</Link>
-						<Link
-							to="/profile"
-							className="text-sm font-medium hover:text-brand-primary transition-colors flex items-center gap-2"
-						>
-							<UserIcon className="w-4 h-4" /> Perfil
-						</Link>
+						{!isSessionLoading && session && (
+							<Link
+								to="/profile"
+								className="text-sm font-medium hover:text-brand-primary transition-colors flex items-center gap-2"
+							>
+								<UserIcon className="w-4 h-4" /> Perfil
+							</Link>
+						)}
 					</div>
 
-					<div className="flex items-center gap-4">
-						<Link
-							to="/create-listing"
-							className="btn-primary flex items-center gap-2 text-sm py-1.5"
-						>
-							<PlusCircle className="w-4 h-4" />
-							<span className="hidden sm:inline">Criar Anúncio</span>
-						</Link>
+					<div className="flex items-center gap-4 min-w-[220px] justify-end">
+						{isSessionLoading ? (
+							<div className="h-8 w-[160px] rounded-md bg-white/5 animate-pulse" />
+						) : !session ? (
+							<button
+								type="button"
+								onClick={handleDiscordLogin}
+								disabled={isAuthLoading}
+								className="text-sm font-medium hover:text-brand-primary transition-colors flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+							>
+								<LogIn className="w-4 h-4" /> Entrar com Discord
+							</button>
+						) : (
+							<>
+								<button
+									type="button"
+									onClick={handleSignOut}
+									disabled={isAuthLoading}
+									className="text-sm font-medium text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2"
+								>
+									<LogOut className="w-4 h-4" /> Sair
+								</button>
+								<Link
+									to="/create-listing"
+									className="btn-primary flex items-center gap-2 text-sm py-1.5"
+								>
+									<PlusCircle className="w-4 h-4" />
+									<span className="hidden sm:inline">Criar Chamado</span>
+								</Link>
+							</>
+						)}
 					</div>
 				</div>
 			</nav>

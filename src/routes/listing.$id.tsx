@@ -1,24 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-	ArrowLeft,
-	Check,
-	Clock,
-	Copy,
-	Globe,
-	Heart,
-	Info,
-	MessageSquare,
-	Server,
-	Shield,
-	Target,
-	Users,
-} from "lucide-react";
+import { ArrowLeft, Check, Copy, Eye, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
-import DetailItem from "@/components/DetailItem";
-import { getGames, getListings, getUser } from "@/lib/api";
-import { cn } from "@/lib/utils";
-import type { CommunityListing, LFGListing, ServerListing } from "@/types";
+import {
+	getGames,
+	getListings,
+	getUser,
+	incrementListingViews,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/listing/$id")({
 	loader: async ({ params }) => {
@@ -32,60 +21,44 @@ function ListingDetails() {
 
 	const { id } = Route.useLoaderData();
 
-	const {
-		data: games,
-		isLoading: isGamesLoading,
-		isError: isGamesError,
-	} = useQuery({
+	const { data: games } = useQuery({
 		queryKey: ["games"],
 		queryFn: ({ signal }) => getGames(signal),
 	});
 
-	const {
-		data: mockListings,
-		isLoading: isListingsLoading,
-		isError: isListingsError,
-	} = useQuery({
+	const { data: listings } = useQuery({
 		queryKey: ["listings"],
 		queryFn: ({ signal }) => getListings(signal),
 	});
 
-	const {
-		data: user,
-		isLoading: isUserLoading,
-		isError: isUserError,
-	} = useQuery({
-		queryKey: ["user"],
-		queryFn: ({ signal }) => getUser(signal),
-	});
-
-	const listing = mockListings?.find((l) => l.id === id);
+	const listing = listings?.find((l) => l.id === id);
+	const listingId = listing?.id;
 
 	const [isLiked, setIsLiked] = useState(false);
-	const [likesCount, setLikesCount] = useState(0);
+	const [viewsCount, setViewsCount] = useState(0);
 
 	useEffect(() => {
-		if (!listing) return;
-		const likedIds = user?.likedListings ?? [];
-		setIsLiked(likedIds.includes(listing.id));
-		setLikesCount(listing.likes);
-	}, [listing, user]);
+		if (!listingId) return;
+
+		let isMounted = true;
+
+		incrementListingViews(listingId)
+			.then((updatedViews) => {
+				if (!isMounted) return;
+				setViewsCount(updatedViews);
+			})
+			.catch(() => undefined);
+
+		return () => {
+			isMounted = false;
+		};
+	}, [listingId]);
 
 	const game = games?.find((g) => g.id === listing?.gameId);
 
 	if (!listing || !game) {
 		return <div className="p-20 text-center">Anúncio não encontrado.</div>;
 	}
-
-	const handleLike = () => {
-		if (isLiked) {
-			setLikesCount((prev) => prev - 1);
-			setIsLiked(false);
-		} else {
-			setLikesCount((prev) => prev + 1);
-			setIsLiked(true);
-		}
-	};
 
 	const handleCopyIP = () => {
 		if ("ip" in listing && listing.ip) {
@@ -98,7 +71,8 @@ function ListingDetails() {
 	return (
 		<div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
 			<Link
-				to={`/game/${game.id}`}
+				to="/game/$id"
+				params={{ id: game.id }}
 				className="flex items-center gap-2 text-gray-500 hover:text-brand-primary transition-colors text-sm font-bold"
 			>
 				<ArrowLeft className="w-4 h-4" /> Voltar para {game.name}
@@ -115,6 +89,9 @@ function ListingDetails() {
 								Publicado em{" "}
 								{new Date(listing?.createdAt).toLocaleDateString("pt-BR")}
 							</span>
+							<span className="text-gray-500 text-xs font-mono uppercase flex items-center gap-1">
+								<Eye className="w-3 h-3" /> {viewsCount}
+							</span>
 						</div>
 						<h1 className="text-4xl font-bold tracking-tight">
 							{listing?.title}
@@ -123,74 +100,6 @@ function ListingDetails() {
 							{listing?.description}
 						</p>
 					</div>
-
-					<div className="glass-panel p-6 space-y-6">
-						<h2 className="text-xl font-bold flex items-center gap-2">
-							<Info className="w-5 h-5 text-brand-primary" /> Detalhes
-						</h2>
-
-						<div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-							{listing?.type === "LFG" && (
-								<>
-									<DetailItem
-										icon={<Clock />}
-										label="Disponibilidade"
-										value={(listing as LFGListing).availability}
-									/>
-									<DetailItem
-										icon={<Target />}
-										label="Estilo"
-										value={(listing as LFGListing).style}
-									/>
-									<DetailItem
-										icon={<Shield />}
-										label="Objetivo"
-										value={(listing as LFGListing).objective}
-									/>
-								</>
-							)}
-							{listing?.type === "SERVER" && (
-								<>
-									<DetailItem
-										icon={<Globe />}
-										label="Região"
-										value={(listing as ServerListing).region}
-									/>
-									<DetailItem
-										icon={<Server />}
-										label="Tipo"
-										value={(listing as ServerListing).serverType}
-									/>
-									<DetailItem
-										icon={<Shield />}
-										label="Regras"
-										value={(listing as ServerListing).rules}
-									/>
-								</>
-							)}
-							{listing?.type === "COMMUNITY" && (
-								<>
-									<DetailItem
-										icon={<Users />}
-										label="Foco"
-										value={(listing as CommunityListing).focus}
-									/>
-									<DetailItem
-										icon={<Shield />}
-										label="Requisitos"
-										value={
-											(listing as CommunityListing).requirements || "Nenhum"
-										}
-									/>
-								</>
-							)}
-							<DetailItem
-								icon={<Globe />}
-								label="Idioma"
-								value={listing?.language || ""}
-							/>
-						</div>
-					</div>
 				</div>
 
 				<div className="space-y-6">
@@ -198,7 +107,7 @@ function ListingDetails() {
 						<h3 className="font-bold text-lg">Ações</h3>
 
 						<div className="space-y-3">
-							<button
+							{/* <button
 								type="button"
 								onClick={handleLike}
 								className={cn(
@@ -210,7 +119,7 @@ function ListingDetails() {
 							>
 								<Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
 								{isLiked ? "Curtido" : "Curtir"} ({likesCount})
-							</button>
+							</button> */}
 
 							<a
 								href={listing?.discord}
@@ -240,7 +149,7 @@ function ListingDetails() {
 						<div className="pt-6 border-t border-border-dark">
 							<p className="text-xs text-gray-500 mb-4">Tags do anúncio</p>
 							<div className="flex flex-wrap gap-2">
-								{listing?.tags?.map((tag) => (
+								{listing?.tags?.map((tag: string) => (
 									<span
 										key={tag}
 										className="text-[10px] bg-white/5 px-2 py-1 rounded border border-white/10 text-gray-400"

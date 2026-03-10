@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PlusCircle } from "lucide-react";
+import { Calendar, Globe, PlusCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import ListingCard from "@/components/ListingCard";
@@ -30,7 +30,7 @@ function GameDetails() {
 	});
 
 	const {
-		data: mockListings,
+		data: listingsData,
 		isLoading: isListingsLoading,
 		isError: isListingsError,
 	} = useQuery({
@@ -43,7 +43,7 @@ function GameDetails() {
 	if (!game)
 		return <div className="p-20 text-center">Jogo não encontrado.</div>;
 
-	const listings = mockListings?.filter(
+	const listings = listingsData?.filter(
 		(l) => l.gameId === id && l.type === activeTab,
 	);
 
@@ -62,7 +62,27 @@ function GameDetails() {
 							<h1 className="text-5xl font-bold tracking-tighter">
 								{game.name}
 							</h1>
-							<p className="text-gray-400 max-w-xl">{game.description}</p>
+							<div className="flex flex-wrap gap-4 text-sm text-gray-500">
+								{game.released && (
+									<div className="flex items-center gap-1">
+										<Calendar className="w-4 h-4" />
+										<span>
+											Lançamento: {new Date(game.released).getFullYear()}
+										</span>
+									</div>
+								)}
+								{game.website && (
+									<a
+										href={game.website}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex items-center gap-1 hover:text-brand-primary transition-colors"
+									>
+										<Globe className="w-4 h-4" />
+										<span>Site Oficial</span>
+									</a>
+								)}
+							</div>
 							<div className="flex gap-2">
 								{game.tags.map((tag) => (
 									<span
@@ -79,7 +99,7 @@ function GameDetails() {
 							search={{ game: id }}
 							className="btn-primary flex items-center gap-2"
 						>
-							<PlusCircle className="w-5 h-5" /> Criar Anúncio
+							<PlusCircle className="w-5 h-5" /> Criar Chamado
 						</Link>
 					</div>
 				</div>

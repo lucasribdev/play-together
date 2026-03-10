@@ -1,9 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Eye, Gamepad2, Heart } from "lucide-react";
+import { ChevronRight, Eye, Gamepad2 } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
-import { getUser } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { Game, Listing, ListingType } from "@/types";
 
@@ -15,35 +12,6 @@ export default function ListingCard({
 	game?: Game;
 }) {
 	const navigate = useNavigate();
-
-	const {
-		data: user,
-		isLoading: isUserLoading,
-		isError: isUserError,
-	} = useQuery({
-		queryKey: ["user"],
-		queryFn: ({ signal }) => getUser(signal),
-	});
-
-	const [isLiked, setIsLiked] = useState(
-		user?.likedListings?.includes(listing.id) ?? false,
-	);
-	const [likesCount, setLikesCount] = useState(listing.likes);
-
-	useEffect(() => {
-		setIsLiked(user?.likedListings?.includes(listing.id) ?? false);
-	}, [user, listing.id]);
-
-	const handleLike = (e: React.MouseEvent) => {
-		e.stopPropagation();
-		if (isLiked) {
-			setLikesCount((prev) => prev - 1);
-			setIsLiked(false);
-		} else {
-			setLikesCount((prev) => prev + 1);
-			setIsLiked(true);
-		}
-	};
 
 	const getTypeStyles = (type: ListingType) => {
 		switch (type) {
@@ -82,7 +50,7 @@ export default function ListingCard({
 				>
 					{getTypeText(listing.type)}
 				</div>
-				<button
+				{/* <button
 					type="button"
 					onClick={handleLike}
 					className={cn(
@@ -92,7 +60,7 @@ export default function ListingCard({
 				>
 					<span className="text-xs font-bold">{likesCount}</span>
 					<Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
-				</button>
+				</button> */}
 			</div>
 
 			<div>
