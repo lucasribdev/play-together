@@ -191,10 +191,6 @@ export const Route = createFileRoute("/api/listings")({
 						return Response.json(
 							{
 								error: "Failed to fetch listings",
-								code: error.code,
-								message: error.message,
-								details: error.details,
-								hint: error.hint,
 							},
 							{ status: 500 },
 						);
@@ -274,10 +270,6 @@ export const Route = createFileRoute("/api/listings")({
 						return Response.json(
 							{
 								error: "Failed to create listing",
-								code: error.code,
-								message: error.message,
-								details: error.details,
-								hint: error.hint,
 							},
 							{
 								status: isPermissionError ? 403 : isConstraintError ? 400 : 500,

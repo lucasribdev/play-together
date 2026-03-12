@@ -25,10 +25,6 @@ export const Route = createFileRoute("/api/games")({
 						return Response.json(
 							{
 								error: "Failed to fetch games",
-								code: error.code,
-								message: error.message,
-								details: error.details,
-								hint: error.hint,
 							},
 							{ status: 500 },
 						);

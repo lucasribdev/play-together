@@ -44,10 +44,6 @@ export const Route = createFileRoute("/api/user")({
 						return Response.json(
 							{
 								error: "Failed to fetch user profile",
-								code: profileError.code,
-								message: profileError.message,
-								details: profileError.details,
-								hint: profileError.hint,
 							},
 							{ status: 500 },
 						);
