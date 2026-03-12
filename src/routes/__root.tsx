@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
+	Link,
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
@@ -38,6 +39,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			},
 		],
 	}),
+	notFoundComponent: NotFound,
 	shellComponent: RootDocument,
 });
 
@@ -86,5 +88,28 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 				<Scripts />
 			</body>
 		</html>
+	);
+}
+
+function NotFound() {
+	return (
+		<div className="max-w-3xl mx-auto px-4 py-24">
+			<div className="glass-panel p-10 text-center space-y-4">
+				<p className="text-xs font-bold tracking-[0.3em] text-gray-500 uppercase">
+					404
+				</p>
+				<h1 className="text-3xl font-bold tracking-tight">
+					Pagina nao encontrada
+				</h1>
+				<p className="text-gray-400">
+					O link pode estar incorreto ou o conteudo nao existe mais.
+				</p>
+				<div>
+					<Link to="/" className="btn-primary inline-flex">
+						Voltar para a home
+					</Link>
+				</div>
+			</div>
+		</div>
 	);
 }
