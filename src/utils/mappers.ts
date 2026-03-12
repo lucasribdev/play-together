@@ -1,4 +1,4 @@
-import type { ListingRow } from "@/types";
+import type { GameRow, ListingRow } from "@/types";
 
 export function mapListing(row: ListingRow) {
 	return {
@@ -7,5 +7,13 @@ export function mapListing(row: ListingRow) {
 		userId: row.user_id,
 		discordInvite: row.discord_invite,
 		createdAt: row.created_at,
+	};
+}
+
+export function mapGame(row: GameRow) {
+	return {
+		...row,
+		coverUrl: row.cover_url,
+		releaseDate: row.release_date,
 	};
 }

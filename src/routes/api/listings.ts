@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { title } from "process";
 import { mapListing } from "@/utils/mappers";
 import { createSupabaseUserClient, supabase } from "@/utils/supabase";
 
@@ -14,7 +13,12 @@ export const Route = createFileRoute("/api/listings")({
 					.order("created_at", { ascending: false });
 
 				if (error) {
-					return Response.json({ error: error.message }, { status: 500 });
+					return Response.json(
+						{
+							error: "Failed to fetch listings",
+						},
+						{ status: 500 },
+					);
 				}
 
 				return Response.json(data.map(mapListing));

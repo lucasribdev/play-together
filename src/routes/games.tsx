@@ -22,7 +22,9 @@ function Games() {
 	const filteredGames = games?.filter(
 		(game) =>
 			game.name.toLowerCase().includes(search.toLowerCase()) ||
-			game.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase())),
+			game.genres.some((genre) =>
+				genre.toLowerCase().includes(search.toLowerCase()),
+			),
 	);
 
 	return (

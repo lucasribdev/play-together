@@ -51,7 +51,7 @@ function GameDetails() {
 		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
 			<div className="relative h-[300px] rounded-3xl overflow-hidden border border-border-dark">
 				<img
-					src={game.image}
+					src={game.coverUrl}
 					alt={game.name}
 					className="w-full h-full object-cover opacity-50"
 					referrerPolicy="no-referrer"
@@ -63,11 +63,11 @@ function GameDetails() {
 								{game.name}
 							</h1>
 							<div className="flex flex-wrap gap-4 text-sm text-gray-500">
-								{game.released && (
+								{game.releaseDate && (
 									<div className="flex items-center gap-1">
 										<Calendar className="w-4 h-4" />
 										<span>
-											Lançamento: {new Date(game.released).getFullYear()}
+											Lançamento: {new Date(game.releaseDate).getFullYear()}
 										</span>
 									</div>
 								)}
@@ -84,12 +84,12 @@ function GameDetails() {
 								)}
 							</div>
 							<div className="flex gap-2">
-								{game.tags.map((tag) => (
+								{game.genres.map((genre) => (
 									<span
-										key={tag}
+										key={genre}
 										className="text-xs bg-white/5 px-3 py-1 rounded-full border border-white/10 text-gray-300"
 									>
-										{tag}
+										{genre}
 									</span>
 								))}
 							</div>

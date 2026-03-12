@@ -3,9 +3,18 @@ export type ListingType = "LFG" | "SERVER" | "COMMUNITY";
 export interface Game {
 	id: string;
 	name: string;
-	image: string;
-	tags: string[];
-	released: string | null;
+	coverUrl: string;
+	genres: string[];
+	releaseDate: string;
+	website: string;
+}
+
+export interface GameRow {
+	id: string;
+	name: string;
+	cover_url: string;
+	genres: string[];
+	release_date: string;
 	website: string;
 }
 

@@ -225,7 +225,7 @@ function RouteComponent() {
 								>
 									<img
 										alt={`${game.name} cover`}
-										src={game.image}
+										src={game.coverUrl}
 										className="w-12 h-12 rounded-lg object-cover"
 										referrerPolicy="no-referrer"
 									/>
