@@ -10,10 +10,21 @@ export const Route = createFileRoute("/api/listings")({
 				const url = new URL(request.url);
 				const gameId = url.searchParams.get("gameId");
 				const userId = url.searchParams.get("userId");
+				const authHeader = request.headers.get("authorization");
+				const supabaseClient = authHeader
+					? createSupabaseUserClient(authHeader)
+					: supabase;
+				const {
+					data: { user },
+				} = authHeader
+					? await supabaseClient.auth.getUser()
+					: { data: { user: null } };
 
-				let query = supabase
+				let query = supabaseClient
 					.from("listings")
-					.select("*, game:games(*)")
+					.select(
+						"*, game:games(*), likes:listing_likes(count), user_likes:listing_likes(user_id)",
+					)
 					.eq("active", true)
 					.order("created_at", { ascending: false });
 
@@ -36,7 +47,16 @@ export const Route = createFileRoute("/api/listings")({
 					);
 				}
 
-				return Response.json(data.map(mapListing));
+				const listings = data.map((listing) => ({
+					...listing,
+					user_likes: user
+						? (listing.user_likes?.filter(
+								(like: { user_id: string }) => like.user_id === user.id,
+							) ?? [])
+						: [],
+				}));
+
+				return Response.json(listings.map(mapListing));
 			},
 			POST: async ({ request }) => {
 				const authHeader = request.headers.get("authorization");

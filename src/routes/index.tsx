@@ -194,11 +194,7 @@ function App() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{filteredListings.map((listing) => (
-						<ListingCard
-							key={listing.id}
-							listing={listing}
-							game={games?.find((g) => g.id === listing.gameId)}
-						/>
+						<ListingCard key={listing.id} listing={listing} />
 					))}
 					{filteredListings.length === 0 && (
 						<div className="col-span-full py-20 text-center glass-panel">

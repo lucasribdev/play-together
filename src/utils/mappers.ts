@@ -15,6 +15,8 @@ export function mapListing(row: ListingRow) {
 		discordInvite: row.discord_invite,
 		views: row.views,
 		active: row.active,
+		likesCount: row.likes?.[0]?.count ?? 0,
+		userLikes: (row.user_likes?.length ?? 0) > 0,
 		createdAt: row.created_at,
 		updatedAt: row.updated_at,
 	};

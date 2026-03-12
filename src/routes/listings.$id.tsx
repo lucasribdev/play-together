@@ -1,8 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, Copy, Eye, MessageSquare } from "lucide-react";
+import {
+	ArrowLeft,
+	Check,
+	Copy,
+	Eye,
+	Heart,
+	MessageSquare,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { getGameById, getListingById, incrementListingViews } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { normalizeDiscordInvite } from "@/utils/discord";
 
 export const Route = createFileRoute("/listings/$id")({
@@ -69,6 +77,8 @@ function ListingDetails() {
 		}
 	};
 
+	const handleLike = () => {};
+
 	return (
 		<div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
 			<Link
@@ -108,19 +118,22 @@ function ListingDetails() {
 						<h3 className="font-bold text-lg">Ações</h3>
 
 						<div className="space-y-3">
-							{/* <button
+							<button
 								type="button"
 								onClick={handleLike}
 								className={cn(
 									"w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-bold transition-all border",
-									isLiked
+									listing.userLikes
 										? "bg-red-500/10 border-red-500 text-red-500"
 										: "bg-transparent border-gray-600 text-gray-400 hover:border-red-400 hover:text-red-400",
 								)}
 							>
-								<Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
-								{isLiked ? "Curtido" : "Curtir"} ({likesCount})
-							</button> */}
+								<Heart
+									className={cn("w-5 h-5", listing.userLikes && "fill-current")}
+								/>
+								{listing.userLikes ? "Curtido" : "Curtir"} ({listing.likesCount}
+								)
+							</button>
 
 							{discordInviteUrl && (
 								<a

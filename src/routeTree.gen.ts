@@ -22,6 +22,7 @@ import { Route as ApiGamesRouteImport } from './routes/api/games'
 import { Route as ApiListingsIdRouteImport } from './routes/api/listings.$id'
 import { Route as ApiGamesIdRouteImport } from './routes/api/games.$id'
 import { Route as ApiListingsIdViewsRouteImport } from './routes/api/listings.$id.views'
+import { Route as ApiListingsIdLikesRouteImport } from './routes/api/listings.$id.likes'
 
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
@@ -88,6 +89,11 @@ const ApiListingsIdViewsRoute = ApiListingsIdViewsRouteImport.update({
   path: '/views',
   getParentRoute: () => ApiListingsIdRoute,
 } as any)
+const ApiListingsIdLikesRoute = ApiListingsIdLikesRouteImport.update({
+  id: '/likes',
+  path: '/likes',
+  getParentRoute: () => ApiListingsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/games/': typeof GamesIndexRoute
   '/api/games/$id': typeof ApiGamesIdRoute
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
+  '/api/listings/$id/likes': typeof ApiListingsIdLikesRoute
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
 }
 export interface FileRoutesByTo {
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/games': typeof GamesIndexRoute
   '/api/games/$id': typeof ApiGamesIdRoute
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
+  '/api/listings/$id/likes': typeof ApiListingsIdLikesRoute
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
 }
 export interface FileRoutesById {
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/games/': typeof GamesIndexRoute
   '/api/games/$id': typeof ApiGamesIdRoute
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
+  '/api/listings/$id/likes': typeof ApiListingsIdLikesRoute
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
 }
 export interface FileRouteTypes {
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/games/'
     | '/api/games/$id'
     | '/api/listings/$id'
+    | '/api/listings/$id/likes'
     | '/api/listings/$id/views'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/api/games/$id'
     | '/api/listings/$id'
+    | '/api/listings/$id/likes'
     | '/api/listings/$id/views'
   id:
     | '__root__'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/games/'
     | '/api/games/$id'
     | '/api/listings/$id'
+    | '/api/listings/$id/likes'
     | '/api/listings/$id/views'
   fileRoutesById: FileRoutesById
 }
@@ -285,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiListingsIdViewsRouteImport
       parentRoute: typeof ApiListingsIdRoute
     }
+    '/api/listings/$id/likes': {
+      id: '/api/listings/$id/likes'
+      path: '/likes'
+      fullPath: '/api/listings/$id/likes'
+      preLoaderRoute: typeof ApiListingsIdLikesRouteImport
+      parentRoute: typeof ApiListingsIdRoute
+    }
   }
 }
 
@@ -313,10 +332,12 @@ const ApiGamesRouteWithChildren = ApiGamesRoute._addFileChildren(
 )
 
 interface ApiListingsIdRouteChildren {
+  ApiListingsIdLikesRoute: typeof ApiListingsIdLikesRoute
   ApiListingsIdViewsRoute: typeof ApiListingsIdViewsRoute
 }
 
 const ApiListingsIdRouteChildren: ApiListingsIdRouteChildren = {
+  ApiListingsIdLikesRoute: ApiListingsIdLikesRoute,
   ApiListingsIdViewsRoute: ApiListingsIdViewsRoute,
 }
 

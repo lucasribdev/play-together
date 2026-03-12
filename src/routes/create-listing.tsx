@@ -87,18 +87,15 @@ function RouteComponent() {
 				return;
 			}
 
-			const createdListing = await createListing(
-				{
-					gameId: selectedGame,
-					type,
-					title: value.title,
-					description: value.description,
-					discordInvite: normalizeDiscordInvite(value.discord_invite) ?? "",
-					ip: type === "SERVER" ? value.ip : undefined,
-					tags: value.tags,
-				},
-				session.access_token,
-			);
+			const createdListing = await createListing({
+				gameId: selectedGame,
+				type,
+				title: value.title,
+				description: value.description,
+				discordInvite: normalizeDiscordInvite(value.discord_invite) ?? "",
+				ip: type === "SERVER" ? value.ip : undefined,
+				tags: value.tags,
+			});
 
 			navigate({ to: "/listings/$id", params: { id: createdListing.id } });
 		},

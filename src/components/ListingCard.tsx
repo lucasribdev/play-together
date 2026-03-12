@@ -1,11 +1,56 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Eye, Gamepad2 } from "lucide-react";
+import { ChevronRight, Eye, Gamepad2, Heart } from "lucide-react";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { toggleListingLike } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { Listing, ListingType } from "@/types";
 
 export default function ListingCard({ listing }: { listing: Listing }) {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
+	const { session, isSessionLoading } = useAuth();
+	const [likeState, setLikeState] = useState({
+		likesCount: listing.likesCount,
+		userLikes: listing.userLikes,
+	});
+
+	useEffect(() => {
+		setLikeState({
+			likesCount: listing.likesCount,
+			userLikes: listing.userLikes,
+		});
+	}, [listing.likesCount, listing.userLikes]);
+
+	const likeMutation = useMutation({
+		mutationFn: () => toggleListingLike(listing.id),
+		onMutate: () => {
+			const previousState = {
+				likesCount: likeState.likesCount,
+				userLikes: likeState.userLikes,
+			};
+
+			setLikeState((current) => ({
+				userLikes: !current.userLikes,
+				likesCount: current.likesCount + (current.userLikes ? -1 : 1),
+			}));
+
+			return { previousState };
+		},
+		onError: (_error, _variables, context) => {
+			if (context?.previousState) {
+				setLikeState(context.previousState);
+			}
+		},
+		onSettled: async () => {
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["listing", listing.id] }),
+				queryClient.invalidateQueries({ queryKey: ["listings"] }),
+			]);
+		},
+	});
 
 	const getTypeStyles = (type: ListingType) => {
 		switch (type) {
@@ -29,6 +74,12 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 		}
 	};
 
+	const handleLike = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (isSessionLoading || !session || likeMutation.isPending) return;
+		likeMutation.mutate();
+	};
+
 	return (
 		<motion.div
 			whileHover={{ y: -4 }}
@@ -46,17 +97,24 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 				>
 					{getTypeText(listing.type)}
 				</div>
-				{/* <button
+				<button
 					type="button"
 					onClick={handleLike}
+					disabled={isSessionLoading || !session || likeMutation.isPending}
 					className={cn(
 						"flex items-center gap-1 transition-all",
-						isLiked ? "text-red-500" : "text-gray-500 hover:text-red-400",
+						likeState.userLikes
+							? "text-red-500"
+							: "text-gray-500 hover:text-red-400",
+						(isSessionLoading || !session || likeMutation.isPending) &&
+							"pointer-events-none opacity-70",
 					)}
 				>
-					<span className="text-xs font-bold">{likesCount}</span>
-					<Heart className={cn("w-5 h-5", isLiked && "fill-current")} />
-				</button> */}
+					<span className="text-xs font-bold">{likeState.likesCount}</span>
+					<Heart
+						className={cn("w-5 h-5", likeState.userLikes && "fill-current")}
+					/>
+				</button>
 			</div>
 
 			<div>

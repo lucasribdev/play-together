@@ -1,6 +1,17 @@
 import type { CreateListingInput, Game, Listing, Profile } from "@/types";
 import { supabase } from "@/utils/supabase";
 
+async function getAuthHeaders() {
+	const { data } = await supabase.auth.getSession();
+	const accessToken = data.session?.access_token;
+
+	return accessToken
+		? {
+				Authorization: `Bearer ${accessToken}`,
+			}
+		: undefined;
+}
+
 export async function getGames(signal?: AbortSignal): Promise<Game[]> {
 	const response = await fetch("/api/games", { signal });
 
@@ -25,7 +36,10 @@ export async function getGameById(
 }
 
 export async function getListings(signal?: AbortSignal): Promise<Listing[]> {
-	const response = await fetch("/api/listings", { signal });
+	const response = await fetch("/api/listings", {
+		signal,
+		headers: await getAuthHeaders(),
+	});
 
 	if (!response.ok) {
 		throw new Error("Failed to fetch listings");
@@ -40,7 +54,10 @@ export async function getListingsByGameId(
 ): Promise<Listing[]> {
 	const response = await fetch(
 		`/api/listings?gameId=${encodeURIComponent(id)}`,
-		{ signal },
+		{
+			signal,
+			headers: await getAuthHeaders(),
+		},
 	);
 
 	if (!response.ok) {
@@ -56,7 +73,10 @@ export async function getListingsByUserId(
 ): Promise<Listing[]> {
 	const response = await fetch(
 		`/api/listings?userId=${encodeURIComponent(id)}`,
-		{ signal },
+		{
+			signal,
+			headers: await getAuthHeaders(),
+		},
 	);
 
 	if (!response.ok) {
@@ -80,16 +100,9 @@ export async function getListingById(
 }
 
 export async function getProfile(signal?: AbortSignal): Promise<Profile> {
-	const { data } = await supabase.auth.getSession();
-	const accessToken = data.session?.access_token;
-
 	const response = await fetch("/api/profile", {
 		signal,
-		headers: accessToken
-			? {
-					Authorization: `Bearer ${accessToken}`,
-				}
-			: undefined,
+		headers: await getAuthHeaders(),
 	});
 
 	if (!response.ok) {
@@ -116,17 +129,28 @@ export async function incrementListingViews(
 	return payload.views;
 }
 
+export async function toggleListingLike(
+	id: string,
+	signal?: AbortSignal,
+): Promise<void> {
+	const response = await fetch(`/api/listings/${id}/likes`, {
+		method: "POST",
+		headers: await getAuthHeaders(),
+		signal,
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to toggle listing like");
+	}
+}
+
 export async function createListing(
 	input: CreateListingInput,
-	accessToken: string,
 	signal?: AbortSignal,
 ): Promise<Listing> {
 	const response = await fetch("/api/listings", {
 		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${accessToken}`,
-		},
+		headers: await getAuthHeaders(),
 		body: JSON.stringify(input),
 		signal,
 	});
