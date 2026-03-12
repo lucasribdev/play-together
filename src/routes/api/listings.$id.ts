@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { mapListing } from "@/utils/mappers";
 import { supabase } from "@/utils/supabase";
 
 export const Route = createFileRoute("/api/listings/$id")({
@@ -20,7 +21,7 @@ export const Route = createFileRoute("/api/listings/$id")({
 					);
 				}
 
-				return Response.json(data);
+				return Response.json(mapListing(data));
 			},
 		},
 	},

@@ -11,6 +11,19 @@ export async function getGames(signal?: AbortSignal): Promise<Game[]> {
 	return response.json() as Promise<Game[]>;
 }
 
+export async function getGameById(
+	id: string,
+	signal?: AbortSignal,
+): Promise<Game> {
+	const response = await fetch(`/api/games/${id}`, { signal });
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch game");
+	}
+
+	return response.json() as Promise<Game>;
+}
+
 export async function getListings(signal?: AbortSignal): Promise<Listing[]> {
 	const response = await fetch("/api/listings", { signal });
 
@@ -19,6 +32,35 @@ export async function getListings(signal?: AbortSignal): Promise<Listing[]> {
 	}
 
 	return response.json() as Promise<Listing[]>;
+}
+
+export async function getListingsByGameId(
+	id: string,
+	signal?: AbortSignal,
+): Promise<Listing[]> {
+	const response = await fetch(
+		`/api/listings?gameId=${encodeURIComponent(id)}`,
+		{ signal },
+	);
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch listings");
+	}
+
+	return response.json() as Promise<Listing[]>;
+}
+
+export async function getListingById(
+	id: string,
+	signal?: AbortSignal,
+): Promise<Listing> {
+	const response = await fetch(`/api/listings/${id}`, { signal });
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch listing");
+	}
+
+	return response.json() as Promise<Listing>;
 }
 
 export async function getUser(signal?: AbortSignal): Promise<User> {

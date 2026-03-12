@@ -4,7 +4,7 @@ import { Calendar, Globe, PlusCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import ListingCard from "@/components/ListingCard";
-import { getGames, getListings } from "@/lib/api";
+import { getGameById, getListingsByGameId } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { ListingType } from "@/types";
 
@@ -21,31 +21,27 @@ function GameDetails() {
 	const { id } = Route.useLoaderData();
 
 	const {
-		data: games,
-		isLoading: isGamesLoading,
-		isError: isGamesError,
+		data: game,
+		isLoading: isGameLoading,
+		isError: isGameError,
 	} = useQuery({
-		queryKey: ["games"],
-		queryFn: ({ signal }) => getGames(signal),
-	})
+		queryKey: ["game", id],
+		queryFn: ({ signal }) => getGameById(id, signal),
+	});
 
 	const {
 		data: listingsData,
 		isLoading: isListingsLoading,
 		isError: isListingsError,
 	} = useQuery({
-		queryKey: ["listings"],
-		queryFn: ({ signal }) => getListings(signal),
-	})
-
-	const game = games?.find((g) => g.id === id);
+		queryKey: ["listings", id],
+		queryFn: ({ signal }) => getListingsByGameId(id, signal),
+	});
 
 	if (!game)
 		return <div className="p-20 text-center">Jogo não encontrado.</div>;
 
-	const listings = listingsData?.filter(
-		(l) => l.gameId === id && l.type === activeTab,
-	)
+	const listings = listingsData?.filter((l) => l.type === activeTab);
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -148,5 +144,5 @@ function GameDetails() {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

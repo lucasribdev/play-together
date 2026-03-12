@@ -2,12 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, Copy, Eye, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-	getGames,
-	getListings,
-	getUser,
-	incrementListingViews,
-} from "@/lib/api";
+import { getGameById, getListingById, incrementListingViews } from "@/lib/api";
 
 export const Route = createFileRoute("/listings/$id")({
 	loader: async ({ params }) => {
@@ -21,28 +16,33 @@ function ListingDetails() {
 
 	const { id } = Route.useLoaderData();
 
-	const { data: games } = useQuery({
-		queryKey: ["games"],
-		queryFn: ({ signal }) => getGames(signal),
+	const { data: listing } = useQuery({
+		queryKey: ["listing", id],
+		queryFn: ({ signal }) => getListingById(id, signal),
 	});
 
-	const { data: listings } = useQuery({
-		queryKey: ["listings"],
-		queryFn: ({ signal }) => getListings(signal),
+	const gameId = listing?.gameId;
+
+	const { data: game } = useQuery({
+		queryKey: ["game", gameId],
+		queryFn: ({ signal }) => {
+			if (!gameId) {
+				throw new Error("Missing gameId");
+			}
+
+			return getGameById(gameId, signal);
+		},
+		enabled: Boolean(gameId),
 	});
 
-	const listing = listings?.find((l) => l.id === id);
-	const listingId = listing?.id;
-
-	const [isLiked, setIsLiked] = useState(false);
 	const [viewsCount, setViewsCount] = useState(0);
 
 	useEffect(() => {
-		if (!listingId) return;
+		if (!listing?.id) return;
 
 		let isMounted = true;
 
-		incrementListingViews(listingId)
+		incrementListingViews(listing.id)
 			.then((updatedViews) => {
 				if (!isMounted) return;
 				setViewsCount(updatedViews);
@@ -52,9 +52,7 @@ function ListingDetails() {
 		return () => {
 			isMounted = false;
 		};
-	}, [listingId]);
-
-	const game = games?.find((g) => g.id === listing?.gameId);
+	}, [listing?.id]);
 
 	if (!listing || !game) {
 		return <div className="p-20 text-center">Anúncio não encontrado.</div>;

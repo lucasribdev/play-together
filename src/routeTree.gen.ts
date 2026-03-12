@@ -13,6 +13,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GamesIndexRouteImport } from './routes/games.index'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
 import { Route as GamesIdRouteImport } from './routes/games.$id'
 import { Route as ApiUserRouteImport } from './routes/api/user'
@@ -41,6 +42,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GamesIndexRoute = GamesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GamesRoute,
 } as any)
 const ListingsIdRoute = ListingsIdRouteImport.update({
   id: '/listings/$id',
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/api/user': typeof ApiUserRoute
   '/games/$id': typeof GamesIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/games/': typeof GamesIndexRoute
   '/api/games/$id': typeof ApiGamesIdRoute
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
@@ -100,13 +107,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create-listing': typeof CreateListingRoute
-  '/games': typeof GamesRouteWithChildren
   '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/api/user': typeof ApiUserRoute
   '/games/$id': typeof GamesIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/games': typeof GamesIndexRoute
   '/api/games/$id': typeof ApiGamesIdRoute
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
@@ -122,6 +129,7 @@ export interface FileRoutesById {
   '/api/user': typeof ApiUserRoute
   '/games/$id': typeof GamesIdRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/games/': typeof GamesIndexRoute
   '/api/games/$id': typeof ApiGamesIdRoute
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
@@ -138,6 +146,7 @@ export interface FileRouteTypes {
     | '/api/user'
     | '/games/$id'
     | '/listings/$id'
+    | '/games/'
     | '/api/games/$id'
     | '/api/listings/$id'
     | '/api/listings/$id/views'
@@ -145,13 +154,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/create-listing'
-    | '/games'
     | '/profile'
     | '/api/games'
     | '/api/listings'
     | '/api/user'
     | '/games/$id'
     | '/listings/$id'
+    | '/games'
     | '/api/games/$id'
     | '/api/listings/$id'
     | '/api/listings/$id/views'
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/api/user'
     | '/games/$id'
     | '/listings/$id'
+    | '/games/'
     | '/api/games/$id'
     | '/api/listings/$id'
     | '/api/listings/$id/views'
@@ -211,6 +221,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/games/': {
+      id: '/games/'
+      path: '/'
+      fullPath: '/games/'
+      preLoaderRoute: typeof GamesIndexRouteImport
+      parentRoute: typeof GamesRoute
     }
     '/listings/$id': {
       id: '/listings/$id'
@@ -273,10 +290,12 @@ declare module '@tanstack/react-router' {
 
 interface GamesRouteChildren {
   GamesIdRoute: typeof GamesIdRoute
+  GamesIndexRoute: typeof GamesIndexRoute
 }
 
 const GamesRouteChildren: GamesRouteChildren = {
   GamesIdRoute: GamesIdRoute,
+  GamesIndexRoute: GamesIndexRoute,
 }
 
 const GamesRouteWithChildren = GamesRoute._addFileChildren(GamesRouteChildren)

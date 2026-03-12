@@ -5,12 +5,21 @@ import { createSupabaseUserClient, supabase } from "@/utils/supabase";
 export const Route = createFileRoute("/api/listings")({
 	server: {
 		handlers: {
-			GET: async () => {
-				const { data, error } = await supabase
+			GET: async ({ request }) => {
+				const url = new URL(request.url);
+				const gameId = url.searchParams.get("gameId");
+
+				let query = supabase
 					.from("listings")
 					.select("*")
 					.eq("active", true)
 					.order("created_at", { ascending: false });
+
+				if (gameId) {
+					query = query.eq("game_id", gameId);
+				}
+
+				const { data, error } = await query;
 
 				if (error) {
 					return Response.json(
