@@ -1,3 +1,5 @@
+import type { s } from "node_modules/vite/dist/node/chunks/moduleRunnerTransport";
+
 export type ListingType = "LFG" | "SERVER" | "COMMUNITY";
 
 export interface Game {
@@ -18,18 +20,12 @@ export interface GameRow {
 	website: string;
 }
 
-export interface User {
-	id: string;
-	name: string;
-	avatar: string;
-	favorites: string[]; // IDs of listings
-	likedListings: string[]; // IDs of listings the user liked
-}
-
 export interface Listing {
 	id: string;
 	userId: string;
 	gameId: string;
+	gameName: string;
+	game: Game;
 	type: ListingType;
 	title: string;
 	description?: string;
@@ -46,6 +42,8 @@ export interface ListingRow {
 	id: string;
 	user_id: string;
 	game_id: string;
+	game_name: string;
+	game?: GameRow | null;
 	type: ListingType;
 	title: string;
 	description?: string;
@@ -56,4 +54,36 @@ export interface ListingRow {
 	active: boolean;
 	created_at: string;
 	updated_at: string;
+}
+
+export interface Profile {
+	id: string;
+	username: string;
+	fullName: string;
+	avatarUrl: string;
+	bio: string;
+	discordId: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ProfileRow {
+	id: string;
+	username: string;
+	full_name: string;
+	avatar_url: string;
+	bio: string;
+	discord_id: string;
+	created_at: string;
+	update_at: string;
+}
+
+export interface CreateListingInput {
+	gameId: string;
+	type: ListingType;
+	title: string;
+	description: string;
+	discordInvite: string;
+	ip?: string;
+	tags: string[];
 }

@@ -2,15 +2,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { ChevronRight, Eye, Gamepad2 } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import type { Game, Listing, ListingType } from "@/types";
+import type { Listing, ListingType } from "@/types";
 
-export default function ListingCard({
-	listing,
-	game,
-}: {
-	listing: Listing;
-	game?: Game;
-}) {
+export default function ListingCard({ listing }: { listing: Listing }) {
 	const navigate = useNavigate();
 
 	const getTypeStyles = (type: ListingType) => {
@@ -69,11 +63,9 @@ export default function ListingCard({
 				<h3 className="text-lg font-bold group-hover:text-brand-primary transition-colors line-clamp-1">
 					{listing.title}
 				</h3>
-				{game && (
-					<p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
-						<Gamepad2 className="w-3 h-3" /> {game.name}
-					</p>
-				)}
+				<p className="text-xs text-gray-400 flex items-center gap-1 mt-1">
+					<Gamepad2 className="w-3 h-3" /> {listing.game.name}
+				</p>
 			</div>
 
 			<p className="text-sm text-gray-400 line-clamp-2 min-h-[40px]">

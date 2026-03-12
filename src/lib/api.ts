@@ -1,4 +1,4 @@
-import type { Game, Listing, User } from "@/types";
+import type { CreateListingInput, Game, Listing, Profile } from "@/types";
 import { supabase } from "@/utils/supabase";
 
 export async function getGames(signal?: AbortSignal): Promise<Game[]> {
@@ -50,6 +50,22 @@ export async function getListingsByGameId(
 	return response.json() as Promise<Listing[]>;
 }
 
+export async function getListingsByUserId(
+	id: string,
+	signal?: AbortSignal,
+): Promise<Listing[]> {
+	const response = await fetch(
+		`/api/listings?userId=${encodeURIComponent(id)}`,
+		{ signal },
+	);
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch listings");
+	}
+
+	return response.json() as Promise<Listing[]>;
+}
+
 export async function getListingById(
 	id: string,
 	signal?: AbortSignal,
@@ -63,11 +79,11 @@ export async function getListingById(
 	return response.json() as Promise<Listing>;
 }
 
-export async function getUser(signal?: AbortSignal): Promise<User> {
+export async function getProfile(signal?: AbortSignal): Promise<Profile> {
 	const { data } = await supabase.auth.getSession();
 	const accessToken = data.session?.access_token;
 
-	const response = await fetch("/api/user", {
+	const response = await fetch("/api/profile", {
 		signal,
 		headers: accessToken
 			? {
@@ -77,10 +93,10 @@ export async function getUser(signal?: AbortSignal): Promise<User> {
 	});
 
 	if (!response.ok) {
-		throw new Error("Failed to fetch user");
+		throw new Error("Failed to fetch profile");
 	}
 
-	return response.json() as Promise<User>;
+	return response.json() as Promise<Profile>;
 }
 
 export async function incrementListingViews(
@@ -99,16 +115,6 @@ export async function incrementListingViews(
 	const payload = (await response.json()) as { views: number };
 	return payload.views;
 }
-
-type CreateListingInput = {
-	gameId: string;
-	type: "COMMUNITY" | "LFG" | "SERVER";
-	title: string;
-	description: string;
-	discordInvite: string;
-	ip?: string;
-	tags: string[];
-};
 
 export async function createListing(
 	input: CreateListingInput,

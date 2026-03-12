@@ -1,51 +1,42 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { useAuth } from "@/hooks/use-auth";
-import { getGames, getListings, getUser } from "@/lib/api";
+import { getListingsByUserId, getProfile } from "@/lib/api";
 
 export const Route = createFileRoute("/profile")({ component: Profile });
 
 function Profile() {
 	const { session } = useAuth();
 
-	const meta = session?.user?.user_metadata ?? {};
-	const displayName =
-		meta.full_name ||
-		meta.name ||
-		meta.custom_claims?.global_name ||
-		session?.user?.email ||
-		"Jogador";
-	const avatarUrl = meta.avatar_url || meta.picture || meta.image_url;
-	const memberSince = session?.user?.created_at
-		? new Intl.DateTimeFormat("pt-BR", {
-				month: "long",
-				year: "numeric",
-			}).format(new Date(session.user.created_at))
-		: null;
-
-	const { data: user, isLoading: isUserLoading } = useQuery({
-		queryKey: ["user"],
-		queryFn: ({ signal }) => getUser(signal),
+	const { data: profile, isLoading: isProfileLoading } = useQuery({
+		queryKey: ["profile"],
+		queryFn: ({ signal }) => getProfile(signal),
 		enabled: !!session,
 	});
 
-	const { data: games } = useQuery({
-		queryKey: ["games"],
-		queryFn: ({ signal }) => getGames(signal),
-	});
+	const profileId = profile?.id;
 
 	const { data: listings, isLoading: isListingsLoading } = useQuery({
 		queryKey: ["listings"],
-		queryFn: ({ signal }) => getListings(signal),
+		queryFn: ({ signal }) => {
+			if (!profileId) {
+				throw new Error("Missing profile");
+			}
+
+			return getListingsByUserId(profileId, signal);
+		},
 	});
 
-	const favoriteIds = user?.favorites ?? [];
-	const myListings = listings?.filter((l) => l.userId === user?.id);
-	const favoriteListings = listings?.filter((l) => favoriteIds.includes(l.id));
+	const memberSince = profile?.createdAt
+		? new Intl.DateTimeFormat("pt-BR", {
+				month: "long",
+				year: "numeric",
+			}).format(new Date(profile.createdAt))
+		: null;
 
-	if (!session) {
+	if (!profile) {
 		return (
 			<div className="max-w-4xl mx-auto px-4 py-16">
 				<div className="glass-panel p-10 text-center space-y-4">
@@ -59,20 +50,22 @@ function Profile() {
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
 			<div className="flex flex-col md:flex-row items-center gap-8 glass-panel p-8">
-				{avatarUrl ? (
+				{profile.avatarUrl ? (
 					<img
-						src={avatarUrl}
-						alt={displayName}
+						src={profile.avatarUrl}
+						alt={profile.fullName}
 						className="w-32 h-32 rounded-3xl border-4 border-brand-primary/20"
 						referrerPolicy="no-referrer"
 					/>
 				) : (
 					<div className="w-32 h-32 rounded-3xl border-4 border-brand-primary/20 bg-white/5 flex items-center justify-center text-3xl font-bold">
-						{displayName.slice(0, 1).toUpperCase()}
+						{profile.fullName.slice(0, 1).toUpperCase()}
 					</div>
 				)}
 				<div className="text-center md:text-left space-y-2">
-					<h1 className="text-4xl font-bold tracking-tight">{displayName}</h1>
+					<h1 className="text-4xl font-bold tracking-tight">
+						{profile.fullName}
+					</h1>
 					{memberSince && (
 						<p className="text-gray-500">Membro desde {memberSince}</p>
 					)}
@@ -80,13 +73,13 @@ function Profile() {
 					<div className="flex gap-4 pt-4">
 						<div className="text-center">
 							<p className="text-2xl font-bold text-brand-primary">
-								{isListingsLoading ? "—" : (myListings?.length ?? 0)}
+								{isListingsLoading ? "—" : (listings?.length ?? 0)}
 							</p>
 							<p className="text-[10px] text-gray-500 uppercase font-bold">
 								Anúncios
 							</p>
 						</div>
-						<div className="text-center">
+						{/* <div className="text-center">
 							<p className="text-2xl font-bold text-brand-primary">
 								{isUserLoading || isListingsLoading
 									? "—"
@@ -95,7 +88,7 @@ function Profile() {
 							<p className="text-[10px] text-gray-500 uppercase font-bold">
 								Favoritos
 							</p>
-						</div>
+						</div> */}
 					</div>
 				</div>
 			</div>
@@ -106,14 +99,10 @@ function Profile() {
 						<PlusCircle className="text-brand-primary" /> Meus Anúncios
 					</h2>
 					<div className="space-y-4">
-						{myListings?.map((l) => (
-							<ListingCard
-								key={l.id}
-								listing={l}
-								game={games?.find((g) => g.id === l.gameId)}
-							/>
+						{listings?.map((l) => (
+							<ListingCard key={l.id} listing={l} />
 						))}
-						{myListings?.length === 0 && (
+						{listings?.length === 0 && (
 							<p className="text-gray-500 text-center py-10 glass-panel">
 								Você ainda não criou nenhum anúncio.
 							</p>
@@ -121,7 +110,7 @@ function Profile() {
 					</div>
 				</section>
 
-				<section className="space-y-6">
+				{/* <section className="space-y-6">
 					<h2 className="text-2xl font-bold flex items-center gap-2">
 						<Heart className="text-red-500" /> Favoritos
 					</h2>
@@ -139,7 +128,7 @@ function Profile() {
 							</p>
 						)}
 					</div>
-				</section>
+				</section> */}
 			</div>
 		</div>
 	);

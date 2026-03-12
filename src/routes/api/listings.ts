@@ -11,7 +11,7 @@ export const Route = createFileRoute("/api/listings")({
 
 				let query = supabase
 					.from("listings")
-					.select("*")
+					.select("*, game:games(*)")
 					.eq("active", true)
 					.order("created_at", { ascending: false });
 

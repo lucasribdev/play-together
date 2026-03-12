@@ -16,7 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as GamesIndexRouteImport } from './routes/games.index'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
 import { Route as GamesIdRouteImport } from './routes/games.$id'
-import { Route as ApiUserRouteImport } from './routes/api/user'
+import { Route as ApiProfileRouteImport } from './routes/api/profile'
 import { Route as ApiListingsRouteImport } from './routes/api/listings'
 import { Route as ApiGamesRouteImport } from './routes/api/games'
 import { Route as ApiListingsIdRouteImport } from './routes/api/listings.$id'
@@ -58,9 +58,9 @@ const GamesIdRoute = GamesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => GamesRoute,
 } as any)
-const ApiUserRoute = ApiUserRouteImport.update({
-  id: '/api/user',
-  path: '/api/user',
+const ApiProfileRoute = ApiProfileRouteImport.update({
+  id: '/api/profile',
+  path: '/api/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiListingsRoute = ApiListingsRouteImport.update({
@@ -96,7 +96,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
-  '/api/user': typeof ApiUserRoute
+  '/api/profile': typeof ApiProfileRoute
   '/games/$id': typeof GamesIdRoute
   '/listings/$id': typeof ListingsIdRoute
   '/games/': typeof GamesIndexRoute
@@ -110,7 +110,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
-  '/api/user': typeof ApiUserRoute
+  '/api/profile': typeof ApiProfileRoute
   '/games/$id': typeof GamesIdRoute
   '/listings/$id': typeof ListingsIdRoute
   '/games': typeof GamesIndexRoute
@@ -126,7 +126,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
-  '/api/user': typeof ApiUserRoute
+  '/api/profile': typeof ApiProfileRoute
   '/games/$id': typeof GamesIdRoute
   '/listings/$id': typeof ListingsIdRoute
   '/games/': typeof GamesIndexRoute
@@ -143,7 +143,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/api/games'
     | '/api/listings'
-    | '/api/user'
+    | '/api/profile'
     | '/games/$id'
     | '/listings/$id'
     | '/games/'
@@ -157,7 +157,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/api/games'
     | '/api/listings'
-    | '/api/user'
+    | '/api/profile'
     | '/games/$id'
     | '/listings/$id'
     | '/games'
@@ -172,7 +172,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/api/games'
     | '/api/listings'
-    | '/api/user'
+    | '/api/profile'
     | '/games/$id'
     | '/listings/$id'
     | '/games/'
@@ -188,7 +188,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ApiGamesRoute: typeof ApiGamesRouteWithChildren
   ApiListingsRoute: typeof ApiListingsRouteWithChildren
-  ApiUserRoute: typeof ApiUserRoute
+  ApiProfileRoute: typeof ApiProfileRoute
   ListingsIdRoute: typeof ListingsIdRoute
 }
 
@@ -243,11 +243,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesIdRouteImport
       parentRoute: typeof GamesRoute
     }
-    '/api/user': {
-      id: '/api/user'
-      path: '/api/user'
-      fullPath: '/api/user'
-      preLoaderRoute: typeof ApiUserRouteImport
+    '/api/profile': {
+      id: '/api/profile'
+      path: '/api/profile'
+      fullPath: '/api/profile'
+      preLoaderRoute: typeof ApiProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/listings': {
@@ -343,7 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ApiGamesRoute: ApiGamesRouteWithChildren,
   ApiListingsRoute: ApiListingsRouteWithChildren,
-  ApiUserRoute: ApiUserRoute,
+  ApiProfileRoute: ApiProfileRoute,
   ListingsIdRoute: ListingsIdRoute,
 }
 export const routeTree = rootRouteImport
