@@ -1,27 +1,34 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { mapListing } from "@/utils/mappers";
-import { supabase } from "@/utils/supabase";
+import type { ListingByIdRpcRow } from "@/types";
+import { mapListingByIdRpc } from "@/utils/mappers";
+import { createSupabaseUserClient, supabase } from "@/utils/supabase";
 
 export const Route = createFileRoute("/api/listings/$id")({
 	server: {
 		handlers: {
-			GET: async ({ params }) => {
-				const { data, error } = await supabase
-					.from("listings")
-					.select("*, game:games(*)")
-					.eq("id", params.id)
-					.single();
+			GET: async ({ params, request }) => {
+				const authHeader = request.headers.get("authorization");
+				const supabaseClient = authHeader
+					? createSupabaseUserClient(authHeader)
+					: supabase;
+				const { data, error } = await supabaseClient
+					.rpc("get_listing_by_id", {
+						p_listing_id: params.id,
+					})
+					.maybeSingle();
 
 				if (error) {
 					return Response.json(
-						{
-							error: "Failed to fetch listing",
-						},
+						{ error: "Failed to fetch listing" },
 						{ status: 500 },
 					);
 				}
 
-				return Response.json(mapListing(data));
+				if (!data) {
+					return Response.json({ error: "Listing not found" }, { status: 404 });
+				}
+
+				return Response.json(mapListingByIdRpc(data as ListingByIdRpcRow));
 			},
 		},
 	},

@@ -90,7 +90,10 @@ export async function getListingById(
 	id: string,
 	signal?: AbortSignal,
 ): Promise<Listing> {
-	const response = await fetch(`/api/listings/${id}`, { signal });
+	const response = await fetch(`/api/listings/${id}`, {
+		signal,
+		headers: await getAuthHeaders(),
+	});
 
 	if (!response.ok) {
 		throw new Error("Failed to fetch listing");

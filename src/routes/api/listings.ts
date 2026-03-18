@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { ListingByIdRpcRow, ListingsRpcRow } from "@/types";
 import { normalizeDiscordInvite } from "@/utils/discord";
-import { mapListing } from "@/utils/mappers";
+import { mapListingByIdRpc, mapListingsRpc } from "@/utils/mappers";
 import { createSupabaseUserClient, supabase } from "@/utils/supabase";
 
 export const Route = createFileRoute("/api/listings")({
@@ -14,29 +15,10 @@ export const Route = createFileRoute("/api/listings")({
 				const supabaseClient = authHeader
 					? createSupabaseUserClient(authHeader)
 					: supabase;
-				const {
-					data: { user },
-				} = authHeader
-					? await supabaseClient.auth.getUser()
-					: { data: { user: null } };
-
-				let query = supabaseClient
-					.from("listings")
-					.select(
-						"*, game:games(*), likes:listing_likes(count), user_likes:listing_likes(user_id)",
-					)
-					.eq("active", true)
-					.order("created_at", { ascending: false });
-
-				if (gameId) {
-					query = query.eq("game_id", gameId);
-				}
-
-				if (userId) {
-					query = query.eq("user_id", userId);
-				}
-
-				const { data, error } = await query;
+				const { data, error } = await supabaseClient.rpc("get_listings", {
+					p_game_id: gameId,
+					p_user_id: userId,
+				});
 
 				if (error) {
 					return Response.json(
@@ -47,16 +29,9 @@ export const Route = createFileRoute("/api/listings")({
 					);
 				}
 
-				const listings = data.map((listing) => ({
-					...listing,
-					user_likes: user
-						? (listing.user_likes?.filter(
-								(like: { user_id: string }) => like.user_id === user.id,
-							) ?? [])
-						: [],
-				}));
+				const listings = (data ?? []) as ListingsRpcRow[];
 
-				return Response.json(listings.map(mapListing));
+				return Response.json(listings.map(mapListingsRpc));
 			},
 			POST: async ({ request }) => {
 				const authHeader = request.headers.get("authorization");
@@ -102,7 +77,27 @@ export const Route = createFileRoute("/api/listings")({
 					return Response.json({ error: error.message }, { status: 500 });
 				}
 
-				return Response.json(mapListing(data), { status: 201 });
+				const { data: createdListing, error: createdListingError } =
+					await supabaseUser
+						.rpc("get_listing_by_id", {
+							p_listing_id: data.id,
+						})
+						.maybeSingle();
+
+				if (createdListingError || !createdListing) {
+					return Response.json(
+						{
+							error: "Failed to fetch created listing",
+							message: createdListingError?.message,
+						},
+						{ status: 500 },
+					);
+				}
+
+				return Response.json(
+					mapListingByIdRpc(createdListing as ListingByIdRpcRow),
+					{ status: 201 },
+				);
 			},
 		},
 	},

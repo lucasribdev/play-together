@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	ArrowLeft,
@@ -9,7 +9,12 @@ import {
 	MessageSquare,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getGameById, getListingById, incrementListingViews } from "@/lib/api";
+import { useAuth } from "@/hooks/use-auth";
+import {
+	getListingById,
+	incrementListingViews,
+	toggleListingLike,
+} from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { normalizeDiscordInvite } from "@/utils/discord";
 
@@ -21,7 +26,15 @@ export const Route = createFileRoute("/listings/$id")({
 });
 
 function ListingDetails() {
+	const [likeState, setLikeState] = useState({
+		likesCount: 0,
+		userLiked: false,
+	});
 	const [copied, setCopied] = useState(false);
+	const [viewsCount, setViewsCount] = useState(0);
+
+	const queryClient = useQueryClient();
+	const { session, isSessionLoading } = useAuth();
 
 	const { id } = Route.useLoaderData();
 
@@ -30,21 +43,15 @@ function ListingDetails() {
 		queryFn: ({ signal }) => getListingById(id, signal),
 	});
 
-	const gameId = listing?.gameId;
+	useEffect(() => {
+		if (!listing) return;
 
-	const { data: game } = useQuery({
-		queryKey: ["game", gameId],
-		queryFn: ({ signal }) => {
-			if (!gameId) {
-				throw new Error("Missing gameId");
-			}
-
-			return getGameById(gameId, signal);
-		},
-		enabled: Boolean(gameId),
-	});
-
-	const [viewsCount, setViewsCount] = useState(0);
+		setLikeState({
+			likesCount: listing.likesCount,
+			userLiked: listing.userLiked,
+		});
+		setViewsCount(listing.views);
+	}, [listing]);
 
 	useEffect(() => {
 		if (!listing?.id) return;
@@ -63,8 +70,50 @@ function ListingDetails() {
 		};
 	}, [listing?.id]);
 
-	if (!listing || !game) {
+	const likeMutation = useMutation({
+		mutationFn: () => {
+			if (!listing?.id) {
+				throw new Error("Missing listing id");
+			}
+
+			return toggleListingLike(listing.id);
+		},
+		onMutate: () => {
+			const previousState = {
+				likesCount: likeState.likesCount,
+				userLiked: likeState.userLiked,
+			};
+
+			setLikeState((current) => ({
+				userLiked: !current.userLiked,
+				likesCount: current.likesCount + (current.userLiked ? -1 : 1),
+			}));
+
+			return { previousState };
+		},
+		onError: (_error, _variables, context) => {
+			if (context?.previousState) {
+				setLikeState(context.previousState);
+			}
+		},
+		onSettled: async () => {
+			if (!listing?.id) return;
+
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["listing", listing.id] }),
+				queryClient.invalidateQueries({ queryKey: ["listings"] }),
+				queryClient.invalidateQueries({ queryKey: ["profile"] }),
+				queryClient.invalidateQueries({ queryKey: ["favorite-listings"] }),
+			]);
+		},
+	});
+
+	if (!listing) {
 		return <div className="p-20 text-center">Anúncio não encontrado.</div>;
+	}
+
+	if (!listing.game) {
+		return <div className="p-20 text-center">Carregando anúncio...</div>;
 	}
 
 	const discordInviteUrl = normalizeDiscordInvite(listing.discordInvite ?? "");
@@ -77,16 +126,21 @@ function ListingDetails() {
 		}
 	};
 
-	const handleLike = () => {};
+	const handleLike = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (!listing?.id) return;
+		if (isSessionLoading || !session || likeMutation.isPending) return;
+		likeMutation.mutate();
+	};
 
 	return (
 		<div className="max-w-4xl mx-auto px-4 py-12 space-y-8">
 			<Link
 				to="/games/$id"
-				params={{ id: game.id }}
+				params={{ id: listing.game.id }}
 				className="flex items-center gap-2 text-gray-500 hover:text-brand-primary transition-colors text-sm font-bold"
 			>
-				<ArrowLeft className="w-4 h-4" /> Voltar para {game.name}
+				<ArrowLeft className="w-4 h-4" /> Voltar para {listing.game.name}
 			</Link>
 
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -121,18 +175,24 @@ function ListingDetails() {
 							<button
 								type="button"
 								onClick={handleLike}
+								disabled={
+									isSessionLoading || !session || likeMutation.isPending
+								}
 								className={cn(
 									"w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-bold transition-all border",
-									listing.userLikes
+									likeState.userLiked
 										? "bg-red-500/10 border-red-500 text-red-500"
 										: "bg-transparent border-gray-600 text-gray-400 hover:border-red-400 hover:text-red-400",
 								)}
 							>
 								<Heart
-									className={cn("w-5 h-5", listing.userLikes && "fill-current")}
+									className={cn(
+										"w-5 h-5",
+										likeState.userLiked && "fill-current",
+									)}
 								/>
-								{listing.userLikes ? "Curtido" : "Curtir"} ({listing.likesCount}
-								)
+								{likeState.userLiked ? "Curtido" : "Curtir"} (
+								{likeState.likesCount})
 							</button>
 
 							{discordInviteUrl && (

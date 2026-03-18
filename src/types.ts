@@ -21,8 +21,6 @@ export interface GameRow {
 export interface Listing {
 	id: string;
 	userId: string;
-	gameId: string;
-	gameName: string;
 	game: Game;
 	type: ListingType;
 	title: string;
@@ -33,17 +31,20 @@ export interface Listing {
 	views: number;
 	active: boolean;
 	likesCount: number;
-	userLikes: boolean;
+	userLiked: boolean;
 	createdAt: string;
 	updatedAt: string;
 }
 
-export interface ListingRow {
+export interface ListingByIdRpcRow {
 	id: string;
 	user_id: string;
 	game_id: string;
 	game_name: string;
-	game?: GameRow | null;
+	game_cover_url?: string;
+	game_genres?: string[];
+	game_release_date?: string;
+	game_website?: string;
 	type: ListingType;
 	title: string;
 	description?: string;
@@ -52,10 +53,33 @@ export interface ListingRow {
 	discord_invite?: string;
 	views: number;
 	active: boolean;
-	likes?: ListingLikeCount[];
-	user_likes?: ListingLikeUser[];
+	likes_count: number;
+	user_liked: boolean;
 	created_at: string;
 	updated_at: string;
+}
+
+export interface ListingsRpcRow {
+	id: string;
+	user_id: string;
+	game_id: string;
+	game_name: string;
+	type: ListingType;
+	title: string;
+	description?: string;
+	ip?: string;
+	tags?: string[];
+	discord_invite?: string;
+	views: number;
+	active: boolean;
+	likes_count: number;
+	user_liked: boolean;
+	created_at: string;
+	updated_at: string;
+	game_cover_url?: string;
+	game_genres?: string[];
+	game_release_date?: string;
+	game_website?: string;
 }
 
 export interface Profile {
@@ -65,6 +89,7 @@ export interface Profile {
 	avatarUrl: string;
 	bio: string;
 	discordId: string;
+	likesCount: number;
 	createdAt: string;
 	updatedAt: string;
 }

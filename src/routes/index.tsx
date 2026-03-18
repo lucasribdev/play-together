@@ -26,35 +26,34 @@ function App() {
 		"DATE",
 	);
 
-	const {
-		data: games,
-		isLoading: isGamesLoading,
-		isError: isGamesError,
-	} = useQuery({
+	const { data: games } = useQuery({
 		queryKey: ["games"],
 		queryFn: ({ signal }) => getGames(signal),
 	});
 
-	const {
-		data: listings,
-		isLoading: isListingsLoading,
-		isError: isListingsError,
-	} = useQuery({
+	const { data: listings } = useQuery({
 		queryKey: ["listings"],
 		queryFn: ({ signal }) => getListings(signal),
 	});
 
 	const normalizedSearch = search.trim().toLowerCase();
+	const handleFilterTypeChange = (
+		event: React.ChangeEvent<HTMLSelectElement>,
+	) => {
+		setFilterType(event.target.value as ListingType | "ALL");
+	};
+	const handleSortByChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		setSortBy(event.target.value as "DATE" | "POPULARITY" | "RELEVANCE");
+	};
 	const filteredListings = (listings ?? [])
 		.filter((l) => {
-			const gameName =
-				games?.find((g) => g.id === l.gameId)?.name?.toLowerCase() ?? "";
+			const gameName = l.game.name.toLowerCase();
 			const matchesSearch =
 				normalizedSearch.length === 0 ||
 				l.title.toLowerCase().includes(normalizedSearch) ||
 				gameName.includes(normalizedSearch);
 			const matchesType = filterType === "ALL" || l.type === filterType;
-			const matchesGame = filterGame === "ALL" || l.gameId === filterGame;
+			const matchesGame = filterGame === "ALL" || l.game.id === filterGame;
 			return matchesSearch && matchesType && matchesGame;
 		})
 		.sort((a, b) => {
@@ -161,7 +160,7 @@ function App() {
 							<Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-brand-primary transition-colors pointer-events-none" />
 							<select
 								value={filterType}
-								onChange={(e) => setFilterType(e.target.value as any)}
+								onChange={handleFilterTypeChange}
 								className="w-full h-11 bg-card-dark border border-border-dark rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary transition-all appearance-none cursor-pointer"
 							>
 								<option value="ALL">Todos os Tipos</option>
@@ -178,7 +177,7 @@ function App() {
 							<ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-brand-primary transition-colors pointer-events-none" />
 							<select
 								value={sortBy}
-								onChange={(e) => setSortBy(e.target.value as any)}
+								onChange={handleSortByChange}
 								className="w-full h-11 bg-card-dark border border-border-dark rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-primary transition-all appearance-none cursor-pointer"
 							>
 								<option value="DATE">Mais recentes</option>

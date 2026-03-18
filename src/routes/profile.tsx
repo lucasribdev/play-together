@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { PlusCircle } from "lucide-react";
+import { Heart, PlusCircle } from "lucide-react";
 import ListingCard from "@/components/ListingCard";
 import { useAuth } from "@/hooks/use-auth";
-import { getListingsByUserId, getProfile } from "@/lib/api";
+import { getListings, getListingsByUserId, getProfile } from "@/lib/api";
 
 export const Route = createFileRoute("/profile")({ component: Profile });
 
@@ -28,6 +28,16 @@ function Profile() {
 			return getListingsByUserId(profileId, signal);
 		},
 	});
+
+	const { data: likedListings, isLoading: isLikedListingsLoading } = useQuery({
+		queryKey: ["favorite-listings"],
+		queryFn: ({ signal }) => getListings(signal),
+		enabled: !!session,
+	});
+
+	const likedProfileListings = likedListings?.filter(
+		(listing) => listing.userLiked,
+	);
 
 	const memberSince = profile?.createdAt
 		? new Intl.DateTimeFormat("pt-BR", {
@@ -79,16 +89,16 @@ function Profile() {
 								Anúncios
 							</p>
 						</div>
-						{/* <div className="text-center">
+						<div className="text-center">
 							<p className="text-2xl font-bold text-brand-primary">
-								{isUserLoading || isListingsLoading
+								{isProfileLoading || isLikedListingsLoading
 									? "—"
-									: (favoriteListings?.length ?? 0)}
+									: profile.likesCount}
 							</p>
 							<p className="text-[10px] text-gray-500 uppercase font-bold">
-								Favoritos
+								Curtidas
 							</p>
-						</div> */}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -110,25 +120,21 @@ function Profile() {
 					</div>
 				</section>
 
-				{/* <section className="space-y-6">
+				<section className="space-y-6">
 					<h2 className="text-2xl font-bold flex items-center gap-2">
 						<Heart className="text-red-500" /> Favoritos
 					</h2>
 					<div className="space-y-4">
-						{favoriteListings?.map((l) => (
-							<ListingCard
-								key={l.id}
-								listing={l}
-								game={games?.find((g) => g.id === l.gameId)}
-							/>
+						{likedProfileListings?.map((l) => (
+							<ListingCard key={l.id} listing={l} />
 						))}
-						{favoriteListings?.length === 0 && (
+						{likedProfileListings?.length === 0 && (
 							<p className="text-gray-500 text-center py-10 glass-panel">
 								Você ainda não favoritou nenhum anúncio.
 							</p>
 						)}
 					</div>
-				</section> */}
+				</section>
 			</div>
 		</div>
 	);

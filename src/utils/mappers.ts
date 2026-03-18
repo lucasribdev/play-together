@@ -1,12 +1,22 @@
-import type { GameRow, ListingRow, ProfileRow } from "@/types";
+import type {
+	GameRow,
+	ListingByIdRpcRow,
+	ListingsRpcRow,
+	ProfileRow,
+} from "@/types";
 
-export function mapListing(row: ListingRow) {
+export function mapListingByIdRpc(row: ListingByIdRpcRow) {
 	return {
 		id: row.id,
-		gameId: row.game_id,
 		userId: row.user_id,
-		gameName: row.game_name,
-		game: row.game ? mapGame(row.game) : undefined,
+		game: {
+			id: row.game_id,
+			name: row.game_name,
+			coverUrl: row.game_cover_url ?? "",
+			genres: row.game_genres ?? [],
+			releaseDate: row.game_release_date ?? "",
+			website: row.game_website ?? "",
+		},
 		type: row.type,
 		title: row.title,
 		description: row.description,
@@ -15,8 +25,35 @@ export function mapListing(row: ListingRow) {
 		discordInvite: row.discord_invite,
 		views: row.views,
 		active: row.active,
-		likesCount: row.likes?.[0]?.count ?? 0,
-		userLikes: (row.user_likes?.length ?? 0) > 0,
+		likesCount: row.likes_count,
+		userLiked: row.user_liked,
+		createdAt: row.created_at,
+		updatedAt: row.updated_at,
+	};
+}
+
+export function mapListingsRpc(row: ListingsRpcRow) {
+	return {
+		id: row.id,
+		userId: row.user_id,
+		game: {
+			id: row.game_id,
+			name: row.game_name,
+			coverUrl: row.game_cover_url ?? "",
+			genres: row.game_genres ?? [],
+			releaseDate: row.game_release_date ?? "",
+			website: row.game_website ?? "",
+		},
+		type: row.type,
+		title: row.title,
+		description: row.description,
+		ip: row.ip,
+		tags: row.tags,
+		discordInvite: row.discord_invite,
+		views: row.views,
+		active: row.active,
+		likesCount: row.likes_count,
+		userLiked: row.user_liked,
 		createdAt: row.created_at,
 		updatedAt: row.updated_at,
 	};
@@ -41,6 +78,7 @@ export function mapProfile(row: ProfileRow) {
 		avatarUrl: row.avatar_url,
 		bio: row.bio,
 		discordId: row.discord_id,
+		likesCount: 0,
 		createdAt: row.created_at,
 		updatedAt: row.updated_at,
 	};

@@ -14,27 +14,27 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 	const { session, isSessionLoading } = useAuth();
 	const [likeState, setLikeState] = useState({
 		likesCount: listing.likesCount,
-		userLikes: listing.userLikes,
+		userLiked: listing.userLiked,
 	});
 
 	useEffect(() => {
 		setLikeState({
 			likesCount: listing.likesCount,
-			userLikes: listing.userLikes,
+			userLiked: listing.userLiked,
 		});
-	}, [listing.likesCount, listing.userLikes]);
+	}, [listing.likesCount, listing.userLiked]);
 
 	const likeMutation = useMutation({
 		mutationFn: () => toggleListingLike(listing.id),
 		onMutate: () => {
 			const previousState = {
 				likesCount: likeState.likesCount,
-				userLikes: likeState.userLikes,
+				userLiked: likeState.userLiked,
 			};
 
 			setLikeState((current) => ({
-				userLikes: !current.userLikes,
-				likesCount: current.likesCount + (current.userLikes ? -1 : 1),
+				userLiked: !current.userLiked,
+				likesCount: current.likesCount + (current.userLiked ? -1 : 1),
 			}));
 
 			return { previousState };
@@ -48,6 +48,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 			await Promise.all([
 				queryClient.invalidateQueries({ queryKey: ["listing", listing.id] }),
 				queryClient.invalidateQueries({ queryKey: ["listings"] }),
+				queryClient.invalidateQueries({ queryKey: ["profile"] }),
+				queryClient.invalidateQueries({ queryKey: ["favorite-listings"] }),
 			]);
 		},
 	});
@@ -103,7 +105,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 					disabled={isSessionLoading || !session || likeMutation.isPending}
 					className={cn(
 						"flex items-center gap-1 transition-all",
-						likeState.userLikes
+						likeState.userLiked
 							? "text-red-500"
 							: "text-gray-500 hover:text-red-400",
 						(isSessionLoading || !session || likeMutation.isPending) &&
@@ -112,7 +114,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 				>
 					<span className="text-xs font-bold">{likeState.likesCount}</span>
 					<Heart
-						className={cn("w-5 h-5", likeState.userLikes && "fill-current")}
+						className={cn("w-5 h-5", likeState.userLiked && "fill-current")}
 					/>
 				</button>
 			</div>

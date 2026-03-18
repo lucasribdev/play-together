@@ -29,17 +29,21 @@ supabase db push
 
 Notes:
 
-- `supabase/migrations/202603090100_create_core_tables.sql`
-  - Creates `games`, `profiles`, `listings` with final schema.
-  - Includes `views` on `listings`.
-  - Adds indexes and `updated_at` triggers.
-- `supabase/migrations/202603090200_create_profiles_trigger.sql`
-  - Creates `handle_new_user` trigger on `auth.users` to auto-create `public.profiles`.
-  - Creates `increment_listing_views(uuid)` RPC function used by `/api/listings/$id/views`.
-- `supabase/migrations/202603090300_apply_core_rls_policies.sql`
-  - `games`: public read.
-  - `profiles`: public read, update only by owner (`auth.uid() = id`).
-  - `listings`: public read, insert/update only by owner (`auth.uid() = user_id`).
+- `supabase/migrations/20260318130000_initial_schema.sql`
+  - Creates the full initial schema in one step: tables, indexes, triggers, RLS policies, RPCs and grants.
+  - Represents the final database state expected by the app, without intermediate migration history.
+  - This is intended for `supabase db reset` / fresh environments, since there is no existing data to preserve.
+
+Seed data:
+
+- `supabase/seed.sql`
+  - Creates local sample users, profiles, games, listings and likes.
+  - Gives enough data to test list/detail pages and like counts locally.
+- Apply migrations and seed together with:
+
+```bash
+supabase db reset
+```
 
 Common commands:
 
