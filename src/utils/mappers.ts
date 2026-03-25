@@ -17,6 +17,12 @@ export function mapListingByIdRpc(row: ListingByIdRpcRow) {
 			releaseDate: row.game_release_date ?? "",
 			website: row.game_website ?? "",
 		},
+		profile: {
+			id: row.user_id,
+			username: row.profile_username,
+			fullName: row.profile_full_name,
+			avatarUrl: row.profile_avatar_url,
+		},
 		type: row.type,
 		title: row.title,
 		description: row.description,

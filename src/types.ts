@@ -58,6 +58,9 @@ export interface ListingByIdRpcRow {
 	user_liked: boolean;
 	created_at: string;
 	updated_at: string;
+	profile_username: string;
+	profile_full_name: string;
+	profile_avatar_url: string;
 }
 
 export interface ListingsRpcRow {
