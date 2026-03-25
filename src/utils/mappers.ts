@@ -1,4 +1,3 @@
-import { profile } from "console";
 import type {
 	GameRow,
 	ListingByIdRpcRow,
@@ -47,6 +46,7 @@ export function mapListingsRpc(row: ListingsRpcRow) {
 		profile: {
 			id: row.user_id,
 			username: row.profile_username,
+			fullName: row.profile_full_name,
 			avatarUrl: row.profile_avatar_url,
 		},
 		type: row.type,

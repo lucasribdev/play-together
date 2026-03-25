@@ -149,11 +149,11 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 						<img
 							src={listing?.profile.avatarUrl}
 							className="w-4 h-4 rounded-full border border-white/10"
-							alt={listing?.profile.username}
+							alt={listing?.profile.fullName}
 							referrerPolicy="no-referrer"
 						/>
 						<span className="text-[10px] text-gray-400 font-bold">
-							{listing.profile?.username}
+							{listing.profile?.fullName}
 						</span>
 					</div>
 					<span className="text-[10px] text-gray-500 uppercase font-mono">

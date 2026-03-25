@@ -279,6 +279,7 @@ returns table (
   game_release_date date,
   game_website text,
   profile_username text,
+  profile_full_name text,
   profile_avatar_url text
 )
 language sql
@@ -308,6 +309,7 @@ as $$
     g.release_date as game_release_date,
     g.website as game_website,
     p.username as profile_username,
+    p.full_name as profile_full_name,
     p.avatar_url as profile_avatar_url
   from public.listings l
   join public.games g on g.id = l.game_id
@@ -324,6 +326,7 @@ as $$
     g.release_date,
     g.website,
     p.username,
+    p.full_name,
     p.avatar_url
   order by l.created_at desc;
 $$;

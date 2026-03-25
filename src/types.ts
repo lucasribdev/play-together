@@ -82,6 +82,7 @@ export interface ListingsRpcRow {
 	game_release_date?: string;
 	game_website?: string;
 	profile_username: string;
+	profile_full_name: string;
 	profile_avatar_url: string;
 }
 
