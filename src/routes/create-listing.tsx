@@ -63,7 +63,7 @@ function RouteComponent() {
 
 	const { data: games } = useQuery({
 		queryKey: ["games"],
-		queryFn: ({ signal }) => getGames(signal),
+		queryFn: ({ signal }) => getGames({ signal }),
 	});
 
 	const listingForm = useForm({

@@ -18,6 +18,8 @@ import type { Game, ListingType } from "@/types";
 
 export const Route = createFileRoute("/")({ component: App });
 
+const limit = 6;
+
 function App() {
 	const [search, setSearch] = useState("");
 	const [filterType, setFilterType] = useState<ListingType | "ALL">("ALL");
@@ -27,8 +29,8 @@ function App() {
 	);
 
 	const { data: games } = useQuery({
-		queryKey: ["games"],
-		queryFn: ({ signal }) => getGames(signal),
+		queryKey: ["games", limit],
+		queryFn: ({ signal }) => getGames({ signal, limit }),
 	});
 
 	const { data: listings } = useQuery({
@@ -95,7 +97,7 @@ function App() {
 				</p>
 			</section>
 
-			<section className="space-y-6">
+			<section className="hidden sm:block space-y-6">
 				<div className="flex justify-between items-end">
 					<h2 className="text-2xl font-bold flex items-center gap-2">
 						<Gamepad2 className="text-brand-primary" /> Jogos Populares
@@ -107,7 +109,7 @@ function App() {
 						Ver todos
 					</Link>
 				</div>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+				<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4">
 					{games?.map((game: Game) => (
 						<GameCard key={game.id} game={game} />
 					))}

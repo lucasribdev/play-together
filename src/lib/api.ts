@@ -12,14 +12,28 @@ async function getAuthHeaders() {
 		: undefined;
 }
 
-export async function getGames(signal?: AbortSignal): Promise<Game[]> {
-	const response = await fetch("/api/games", { signal });
+type GetGamesParams = {
+	signal?: AbortSignal;
+	limit?: number;
+};
+
+export async function getGames({
+	signal,
+	limit,
+}: GetGamesParams): Promise<Game[]> {
+	const url = new URL("/api/games", window.location.origin);
+
+	if (limit) {
+		url.searchParams.set("limit", String(limit));
+	}
+
+	const response = await fetch(url.toString(), { signal });
 
 	if (!response.ok) {
 		throw new Error("Failed to fetch games");
 	}
 
-	return response.json() as Promise<Game[]>;
+	return response.json();
 }
 
 export async function getGameById(
