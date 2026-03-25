@@ -1,14 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Heart, PlusCircle } from "lucide-react";
+import { useEffect, useRef } from "react";
 import ListingCard from "@/components/ListingCard";
 import { useAuth } from "@/hooks/use-auth";
-import { getListings, getListingsByUserId, getProfile } from "@/lib/api";
+import {
+	getLikedListingsByUserId,
+	getListingsByUserId,
+	getProfile,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/profile")({ component: Profile });
 
+const pageSize = 6;
+
 function Profile() {
 	const { session } = useAuth();
+	const listingsLoadMoreRef = useRef<HTMLDivElement | null>(null);
+	const likedListingsLoadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	const { data: profile, isLoading: isProfileLoading } = useQuery({
 		queryKey: ["profile"],
@@ -18,26 +27,106 @@ function Profile() {
 
 	const profileId = profile?.id;
 
-	const { data: listings, isLoading: isListingsLoading } = useQuery({
-		queryKey: ["listing", profileId],
-		queryFn: ({ signal }) => {
+	const {
+		data: listingsData,
+		isLoading: isListingsLoading,
+		fetchNextPage: fetchNextListingsPage,
+		hasNextPage: hasNextListingsPage,
+		isFetchingNextPage: isFetchingNextListingsPage,
+	} = useInfiniteQuery({
+		queryKey: ["listings", profileId],
+		initialPageParam: 0,
+		queryFn: ({ pageParam, signal }) => {
 			if (!profileId) {
 				throw new Error("Missing profile");
 			}
 
-			return getListingsByUserId(profileId, signal);
+			return getListingsByUserId({
+				id: profileId,
+				signal,
+				limit: pageSize,
+				offset: pageParam,
+			});
 		},
+		getNextPageParam: (lastPage, allPages) => {
+			if (lastPage.length < pageSize) return undefined;
+			return allPages.flat().length;
+		},
+		enabled: !!profileId,
 	});
 
-	const { data: likedListings, isLoading: isLikedListingsLoading } = useQuery({
-		queryKey: ["favorite-listings"],
-		queryFn: ({ signal }) => getListings(signal),
-		enabled: !!session,
+	const {
+		data: likedListingsData,
+		isLoading: isLikedListingsLoading,
+		fetchNextPage: fetchNextLikedListingsPage,
+		hasNextPage: hasNextLikedListingsPage,
+		isFetchingNextPage: isFetchingNextLikedListingsPage,
+	} = useInfiniteQuery({
+		queryKey: ["favorite-listings", profileId],
+		initialPageParam: 0,
+		queryFn: ({ pageParam, signal }) => {
+			if (!profileId) {
+				throw new Error("Missing profile");
+			}
+
+			return getLikedListingsByUserId({
+				id: profileId,
+				signal,
+				limit: pageSize,
+				offset: pageParam,
+			});
+		},
+		getNextPageParam: (lastPage, allPages) => {
+			if (lastPage.length < pageSize) return undefined;
+			return allPages.flat().length;
+		},
+		enabled: !!profileId,
 	});
 
-	const likedProfileListings = likedListings?.filter(
-		(listing) => listing.userLiked,
-	);
+	const listings = listingsData?.pages.flat() ?? [];
+	const likedListings = likedListingsData?.pages.flat() ?? [];
+
+	useEffect(() => {
+		const node = listingsLoadMoreRef.current;
+		if (!node || !hasNextListingsPage) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting && !isFetchingNextListingsPage) {
+					void fetchNextListingsPage();
+				}
+			},
+			{ rootMargin: "300px" },
+		);
+
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [
+		fetchNextListingsPage,
+		hasNextListingsPage,
+		isFetchingNextListingsPage,
+	]);
+
+	useEffect(() => {
+		const node = likedListingsLoadMoreRef.current;
+		if (!node || !hasNextLikedListingsPage) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting && !isFetchingNextLikedListingsPage) {
+					void fetchNextLikedListingsPage();
+				}
+			},
+			{ rootMargin: "300px" },
+		);
+
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [
+		fetchNextLikedListingsPage,
+		hasNextLikedListingsPage,
+		isFetchingNextLikedListingsPage,
+	]);
 
 	const memberSince = profile?.createdAt
 		? new Intl.DateTimeFormat("pt-BR", {
@@ -112,11 +201,17 @@ function Profile() {
 						{listings?.map((l) => (
 							<ListingCard key={l.id} listing={l} />
 						))}
-						{listings?.length === 0 && (
+						{isFetchingNextListingsPage && (
+							<p className="text-sm text-gray-400 text-center py-4">
+								Carregando mais anúncios...
+							</p>
+						)}
+						{!isListingsLoading && listings.length === 0 && (
 							<p className="text-gray-500 text-center py-10 glass-panel">
 								Você ainda não criou nenhum anúncio.
 							</p>
 						)}
+						<div ref={listingsLoadMoreRef} />
 					</div>
 				</section>
 
@@ -125,14 +220,20 @@ function Profile() {
 						<Heart className="text-red-500" /> Favoritos
 					</h2>
 					<div className="space-y-4">
-						{likedProfileListings?.map((l) => (
+						{likedListings?.map((l) => (
 							<ListingCard key={l.id} listing={l} />
 						))}
-						{likedProfileListings?.length === 0 && (
+						{isFetchingNextLikedListingsPage && (
+							<p className="text-sm text-gray-400 text-center py-4">
+								Carregando mais favoritos...
+							</p>
+						)}
+						{!isLikedListingsLoading && likedListings.length === 0 && (
 							<p className="text-gray-500 text-center py-10 glass-panel">
 								Você ainda não favoritou nenhum anúncio.
 							</p>
 						)}
+						<div ref={likedListingsLoadMoreRef} />
 					</div>
 				</section>
 			</div>

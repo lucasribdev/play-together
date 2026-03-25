@@ -21,6 +21,7 @@ import { Route as ApiListingsRouteImport } from './routes/api/listings'
 import { Route as ApiGamesRouteImport } from './routes/api/games'
 import { Route as ApiListingsIdRouteImport } from './routes/api/listings.$id'
 import { Route as ApiGamesIdRouteImport } from './routes/api/games.$id'
+import { Route as ApiUsersIdLikedListingsRouteImport } from './routes/api/users.$id.liked-listings'
 import { Route as ApiListingsIdViewsRouteImport } from './routes/api/listings.$id.views'
 import { Route as ApiListingsIdLikesRouteImport } from './routes/api/listings.$id.likes'
 
@@ -84,6 +85,11 @@ const ApiGamesIdRoute = ApiGamesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => ApiGamesRoute,
 } as any)
+const ApiUsersIdLikedListingsRoute = ApiUsersIdLikedListingsRouteImport.update({
+  id: '/api/users/$id/liked-listings',
+  path: '/api/users/$id/liked-listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiListingsIdViewsRoute = ApiListingsIdViewsRouteImport.update({
   id: '/views',
   path: '/views',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
   '/api/listings/$id/likes': typeof ApiListingsIdLikesRoute
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
+  '/api/users/$id/liked-listings': typeof ApiUsersIdLikedListingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
   '/api/listings/$id/likes': typeof ApiListingsIdLikesRoute
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
+  '/api/users/$id/liked-listings': typeof ApiUsersIdLikedListingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/api/listings/$id': typeof ApiListingsIdRouteWithChildren
   '/api/listings/$id/likes': typeof ApiListingsIdLikesRoute
   '/api/listings/$id/views': typeof ApiListingsIdViewsRoute
+  '/api/users/$id/liked-listings': typeof ApiUsersIdLikedListingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/api/listings/$id'
     | '/api/listings/$id/likes'
     | '/api/listings/$id/views'
+    | '/api/users/$id/liked-listings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/api/listings/$id'
     | '/api/listings/$id/likes'
     | '/api/listings/$id/views'
+    | '/api/users/$id/liked-listings'
   id:
     | '__root__'
     | '/'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/api/listings/$id'
     | '/api/listings/$id/likes'
     | '/api/listings/$id/views'
+    | '/api/users/$id/liked-listings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -202,6 +214,7 @@ export interface RootRouteChildren {
   ApiListingsRoute: typeof ApiListingsRouteWithChildren
   ApiProfileRoute: typeof ApiProfileRoute
   ListingsIdRoute: typeof ListingsIdRoute
+  ApiUsersIdLikedListingsRoute: typeof ApiUsersIdLikedListingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGamesIdRouteImport
       parentRoute: typeof ApiGamesRoute
     }
+    '/api/users/$id/liked-listings': {
+      id: '/api/users/$id/liked-listings'
+      path: '/api/users/$id/liked-listings'
+      fullPath: '/api/users/$id/liked-listings'
+      preLoaderRoute: typeof ApiUsersIdLikedListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/listings/$id/views': {
       id: '/api/listings/$id/views'
       path: '/views'
@@ -366,6 +386,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiListingsRoute: ApiListingsRouteWithChildren,
   ApiProfileRoute: ApiProfileRoute,
   ListingsIdRoute: ListingsIdRoute,
+  ApiUsersIdLikedListingsRoute: ApiUsersIdLikedListingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,4 +1,3 @@
-import type { off } from "process";
 import type {
 	CreateListingInput,
 	Game,
@@ -104,19 +103,74 @@ export async function getListingsByGameId(
 }
 
 export async function getListingsByUserId(
-	id: string,
-	signal?: AbortSignal,
+	{
+		id,
+		signal,
+		limit,
+		offset,
+	}: {
+		id: string;
+		signal?: AbortSignal;
+		limit?: number;
+		offset?: number;
+	},
 ): Promise<Listing[]> {
-	const response = await fetch(
-		`/api/listings?userId=${encodeURIComponent(id)}`,
-		{
-			signal,
-			headers: await getAuthHeaders(),
-		},
-	);
+	const url = new URL("/api/listings", window.location.origin);
+	url.searchParams.set("userId", id);
+
+	if (limit) {
+		url.searchParams.set("limit", String(limit));
+	}
+
+	if (offset) {
+		url.searchParams.set("offset", String(offset));
+	}
+
+	const response = await fetch(url.toString(), {
+		signal,
+		headers: await getAuthHeaders(),
+	});
 
 	if (!response.ok) {
 		throw new Error("Failed to fetch listings");
+	}
+
+	return response.json() as Promise<Listing[]>;
+}
+
+export async function getLikedListingsByUserId(
+	{
+		id,
+		signal,
+		limit,
+		offset,
+	}: {
+		id: string;
+		signal?: AbortSignal;
+		limit?: number;
+		offset?: number;
+	},
+): Promise<Listing[]> {
+	const url = new URL(
+		`/api/users/${encodeURIComponent(id)}/liked-listings`,
+		window.location.origin,
+	);
+
+	if (limit) {
+		url.searchParams.set("limit", String(limit));
+	}
+
+	if (offset) {
+		url.searchParams.set("offset", String(offset));
+	}
+
+	const response = await fetch(url.toString(), {
+		signal,
+		headers: await getAuthHeaders(),
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch liked listings");
 	}
 
 	return response.json() as Promise<Listing[]>;
