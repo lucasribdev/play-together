@@ -285,6 +285,62 @@ set
   release_date = excluded.release_date,
   updated_at = now();
 
+-- Complements the handcrafted seed so local development always has enough data.
+with generated_games as (
+  select
+    (
+      '90000000-0000-0000-0000-' || lpad(gs::text, 12, '0')
+    )::uuid as id,
+    900000 + gs as rawg_id,
+    'seed-generated' as source,
+    'seed-game-' || gs as slug,
+    'Seed Game ' || gs as name,
+    'https://playtogether.dev/games/seed-game-' || gs as website,
+    'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=640&q=80' as cover_url,
+    case gs % 5
+      when 0 then array['Action', 'Multiplayer']
+      when 1 then array['RPG', 'Co-op']
+      when 2 then array['Sandbox', 'Adventure']
+      when 3 then array['Strategy', 'Online']
+      else array['Survival', 'Community']
+    end as genres,
+    (date '2014-01-01' + ((gs - 1) * interval '45 days'))::date as release_date
+  from generate_series(1, greatest(0, 50 - (select count(*) from public.games))) as gs
+)
+insert into public.games (
+  id,
+  rawg_id,
+  source,
+  slug,
+  name,
+  website,
+  cover_url,
+  genres,
+  release_date
+)
+select
+  id,
+  rawg_id,
+  source,
+  slug,
+  name,
+  website,
+  cover_url,
+  genres,
+  release_date
+from generated_games
+on conflict (id) do update
+set
+  rawg_id = excluded.rawg_id,
+  source = excluded.source,
+  slug = excluded.slug,
+  name = excluded.name,
+  website = excluded.website,
+  cover_url = excluded.cover_url,
+  genres = excluded.genres,
+  release_date = excluded.release_date,
+  updated_at = now();
+
 insert into public.listings (
   id,
   user_id,
@@ -541,6 +597,106 @@ values
     now() - interval '15 hours',
     now() - interval '20 minutes'
   )
+on conflict (id) do update
+set
+  user_id = excluded.user_id,
+  game_id = excluded.game_id,
+  type = excluded.type,
+  title = excluded.title,
+  description = excluded.description,
+  ip = excluded.ip,
+  tags = excluded.tags,
+  discord_invite = excluded.discord_invite,
+  views = excluded.views,
+  active = excluded.active,
+  created_at = excluded.created_at,
+  updated_at = excluded.updated_at;
+
+with target_games as (
+  select
+    id,
+    row_number() over (order by created_at, id) as rn
+  from public.games
+),
+generated_listings as (
+  select
+    (
+      'f2000000-0000-0000-0000-' || lpad(gs::text, 12, '0')
+    )::uuid as id,
+    case gs % 5
+      when 1 then '11111111-1111-1111-1111-111111111111'::uuid
+      when 2 then '22222222-2222-2222-2222-222222222222'::uuid
+      when 3 then '33333333-3333-3333-3333-333333333333'::uuid
+      when 4 then '44444444-4444-4444-4444-444444444444'::uuid
+      else '55555555-5555-5555-5555-555555555555'::uuid
+    end as user_id,
+    (
+      select tg.id
+      from target_games tg
+      where tg.rn = ((gs - 1) % (select count(*) from target_games)) + 1
+    ) as game_id,
+    case gs % 3
+      when 1 then 'SERVER'::public.type
+      when 2 then 'COMMUNITY'::public.type
+      else 'LFG'::public.type
+    end as type,
+    case gs % 3
+      when 1 then 'Servidor gerado #' || gs || ' para partidas recorrentes'
+      when 2 then 'Comunidade gerada #' || gs || ' para jogadores brasileiros'
+      else 'Grupo gerado #' || gs || ' para fechar squad hoje'
+    end as title,
+    case gs % 3
+      when 1 then 'Seed automatica com foco em sessoes frequentes, onboarding rapido e organizacao por Discord.'
+      when 2 then 'Seed automatica para manter variedade local com canais de ajuda, eventos e matchmaking casual.'
+      else 'Seed automatica para testes de listagem, filtros e volume de conteudo na interface.'
+    end as description,
+    case
+      when gs % 3 = 1 then 'seed-' || gs || '.playtogether.dev:' || (3000 + gs)
+      else null
+    end as ip,
+    case gs % 4
+      when 0 then array['br', 'casual', 'party']
+      when 1 then array['dedicado', 'eventos', 'ativo']
+      when 2 then array['social', 'guilda', 'pt-br']
+      else array['ranked', 'coop', 'noite']
+    end as tags,
+    'https://discord.gg/seed' || lpad(gs::text, 4, '0') as discord_invite,
+    (10 + ((gs * 7) % 90))::bigint as views,
+    true as active,
+    now() - (gs * interval '6 hours') as created_at,
+    now() - (gs * interval '3 hours') as updated_at
+  from generate_series(1, greatest(0, 100 - (select count(*) from public.listings))) as gs
+)
+insert into public.listings (
+  id,
+  user_id,
+  game_id,
+  type,
+  title,
+  description,
+  ip,
+  tags,
+  discord_invite,
+  views,
+  active,
+  created_at,
+  updated_at
+)
+select
+  id,
+  user_id,
+  game_id,
+  type,
+  title,
+  description,
+  ip,
+  tags,
+  discord_invite,
+  views,
+  active,
+  created_at,
+  updated_at
+from generated_listings
 on conflict (id) do update
 set
   user_id = excluded.user_id,

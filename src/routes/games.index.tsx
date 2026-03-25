@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GameCard from "@/components/GameCard";
 import { getGames } from "@/lib/api";
 
@@ -9,10 +9,12 @@ export const Route = createFileRoute("/games/")({
 	component: Games,
 });
 
-const pageSize = 12;
+const pageSize = 20;
 
 function Games() {
 	const [search, setSearch] = useState("");
+
+	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useInfiniteQuery({
@@ -31,6 +33,23 @@ function Games() {
 		});
 
 	const games = data?.pages.flat() ?? [];
+
+	useEffect(() => {
+		const node = loadMoreRef.current;
+		if (!node || !hasNextPage) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting && !isFetchingNextPage) {
+					void fetchNextPage();
+				}
+			},
+			{ rootMargin: "300px" },
+		);
+
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
 	const filteredGames = games?.filter(
 		(game) =>
@@ -60,12 +79,13 @@ function Games() {
 						onChange={(e) => setSearch(e.target.value)}
 					/>
 				</div>
-			</div>{" "}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+			</div>
+			<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 				{filteredGames?.map((game) => (
 					<GameCard key={game.id} game={game} />
 				))}
 			</div>
+			<div ref={loadMoreRef} />
 		</div>
 	);
 }

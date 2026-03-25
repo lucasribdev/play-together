@@ -244,7 +244,7 @@ function App() {
 						</div>
 					)}
 				</div>
-				<div ref={loadMoreRef}></div>
+				<div ref={loadMoreRef} />
 			</section>
 		</div>
 	);
