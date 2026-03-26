@@ -113,7 +113,8 @@ export interface ProfileRow {
 }
 
 export interface CreateListingInput {
-	gameId: string;
+	gameId?: string;
+	suggestedGameName?: string;
 	type: ListingType;
 	title: string;
 	description: string;

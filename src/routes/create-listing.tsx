@@ -5,9 +5,10 @@ import {
 	type SearchSchemaInput,
 	useNavigate,
 } from "@tanstack/react-router";
-import { MessageSquare, Server, Users, X } from "lucide-react";
+import { MessageSquare, Search, Server, Users, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 import TypeOption from "@/components/TypeOption";
 import { useAuth } from "@/hooks/use-auth";
 import { createListing, getGames } from "@/lib/api";
@@ -51,14 +52,19 @@ function RouteComponent() {
 	const [step, setStep] = useState(1);
 	const [type, setType] = useState<ListingType | null>(null);
 	const [selectedGame, setSelectedGame] = useState<string | null>(null);
+	const [suggestedGame, setSuggestedGame] = useState<string | null>(null);
 	const [tagInput, setTagInput] = useState("");
+	const [search, setSearch] = useState("");
 	const tagsInputId = useId();
 	const navigate = useNavigate();
 	const { isSessionLoading, session, signInWithDiscord } = useAuth();
 	const { game: searchGame } = Route.useSearch();
 
 	useEffect(() => {
-		if (searchGame) setSelectedGame(searchGame);
+		if (searchGame) {
+			setSelectedGame(searchGame);
+			setSuggestedGame(null);
+		}
 	}, [searchGame]);
 
 	const { data: games } = useQuery({
@@ -80,7 +86,7 @@ function RouteComponent() {
 				return;
 			}
 
-			if (!selectedGame) {
+			if (!selectedGame && !suggestedGame?.trim()) {
 				setStep(2);
 				return;
 			}
@@ -96,7 +102,8 @@ function RouteComponent() {
 			}
 
 			const createdListing = await createListing({
-				gameId: selectedGame,
+				gameId: selectedGame ?? undefined,
+				suggestedGameName: suggestedGame?.trim() || undefined,
 				type,
 				title: value.title,
 				description: value.description,
@@ -214,30 +221,69 @@ function RouteComponent() {
 						className="space-y-6"
 					>
 						<h2 className="text-2xl font-bold text-center">Qual é o jogo?</h2>
+
+						<div className="relative max-w-md mx-auto">
+							<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+							<input
+								type="text"
+								placeholder="Buscar jogo..."
+								value={search}
+								onChange={(e) => setSearch(e.target.value)}
+								className="w-full bg-bg-dark border border-border-dark rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:border-brand-primary"
+							/>
+						</div>
+
 						<div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-							{games?.map((game) => (
-								<button
-									type="button"
-									key={game.id}
-									onClick={() => {
-										setSelectedGame(game.id);
-										setStep(3);
-									}}
-									className={cn(
-										"glass-panel p-4 flex flex-col items-center gap-3 transition-all hover:border-brand-primary",
-										selectedGame === game.id &&
-											"border-brand-primary bg-brand-primary/5",
-									)}
-								>
-									<img
-										alt={`${game.name} cover`}
-										src={game.coverUrl}
-										className="w-12 h-12 rounded-lg object-cover"
-										referrerPolicy="no-referrer"
-									/>
-									<span className="font-bold text-sm">{game.name}</span>
-								</button>
-							))}
+							{games
+								?.filter((g) =>
+									g.name.toLowerCase().includes(search.toLowerCase()),
+								)
+								.map((game) => (
+									<button
+										type="button"
+										key={game.id}
+										onClick={() => {
+											setSelectedGame(game.id);
+											setSuggestedGame(null);
+											setStep(3);
+										}}
+										className={cn(
+											"glass-panel p-4 flex flex-col items-center gap-3 transition-all hover:border-brand-primary",
+											selectedGame === game.id &&
+												"border-brand-primary bg-brand-primary/5",
+										)}
+									>
+										<img
+											alt={`${game.name} cover`}
+											src={game.coverUrl}
+											className="w-12 h-12 rounded-lg object-cover"
+											referrerPolicy="no-referrer"
+										/>
+										<span className="font-bold text-sm">{game.name}</span>
+									</button>
+								))}
+							{games?.filter((g) =>
+								g.name.toLowerCase().includes(search.toLowerCase()),
+							).length === 0 && (
+								<div className="col-span-full py-8 text-center space-y-4">
+									<p className="text-gray-500">
+										Não encontrou o jogo "{search}"?
+									</p>
+									<button
+										type="button"
+										onClick={() => {
+											const normalizedSuggestion = search.trim();
+											toast(`Jogo sugerido: ${normalizedSuggestion}`);
+											setSuggestedGame(normalizedSuggestion);
+											setSelectedGame(null);
+											setStep(3);
+										}}
+										className="btn-primary px-6 py-2 text-sm"
+									>
+										Sugerir e Continuar
+									</button>
+								</div>
+							)}
 						</div>
 						<button
 							type="button"

@@ -235,7 +235,7 @@ function App() {
 							Carregando mais anúncios...
 						</div>
 					)}
-					{filteredListings.length === 0 && (
+					{!isFetchingNextPage && filteredListings.length === 0 && (
 						<div className="col-span-full py-20 text-center glass-panel">
 							<Info className="w-12 h-12 text-gray-600 mx-auto mb-4" />
 							<p className="text-gray-400">

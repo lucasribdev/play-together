@@ -75,7 +75,7 @@ export function mapGame(row: GameRow) {
 		id: row.id,
 		name: row.name,
 		coverUrl: row.cover_url,
-		genres: row.genres,
+		genres: row.genres ?? [],
 		releaseDate: row.release_date,
 		website: row.website,
 	};

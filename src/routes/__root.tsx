@@ -10,6 +10,7 @@ import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Gamepad2 } from "lucide-react";
 import BackToTop from "@/components/BackToTop";
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
@@ -57,6 +58,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							<Header />
 							<main className="flex-grow">{children}</main>
 							<BackToTop />
+							<Toaster />
 							<footer className="border-t border-border-dark py-12 mt-20">
 								<div className="max-w-7xl mx-auto px-4 text-center space-y-4">
 									<div className="flex items-center justify-center gap-2">

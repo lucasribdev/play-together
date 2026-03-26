@@ -72,7 +72,7 @@ function GameDetails() {
 								)}
 							</div>
 							<div className="flex gap-2">
-								{game.genres.map((genre) => (
+								{game.genres?.map((genre) => (
 									<span
 										key={genre}
 										className="text-xs bg-white/5 px-3 py-1 rounded-full border border-white/10 text-gray-300"
