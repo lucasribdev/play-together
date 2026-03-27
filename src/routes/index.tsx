@@ -10,41 +10,43 @@ import {
 	Users,
 } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 import GameCard from "@/components/GameCard";
 import ListingCard from "@/components/ListingCard";
 import { getGames, getListings } from "@/lib/api";
-import type { Game, ListingType } from "@/types";
+import type { Game, ListingSortBy, ListingType } from "@/types";
 
 export const Route = createFileRoute("/")({ component: App });
 
-const limit = 6;
 const pageSize = 12;
 
 function App() {
 	const [search, setSearch] = useState("");
 	const [filterType, setFilterType] = useState<ListingType | "ALL">("ALL");
 	const [filterGame, setFilterGame] = useState<string | "ALL">("ALL");
-	const [sortBy, setSortBy] = useState<"DATE" | "POPULARITY" | "RELEVANCE">(
-		"DATE",
-	);
+	const [sortBy, setSortBy] = useState<ListingSortBy>("DATE");
 
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
+	const deferredSearch = useDeferredValue(search.trim());
 
 	const { data: games } = useQuery({
-		queryKey: ["games", limit],
-		queryFn: ({ signal }) => getGames({ signal, limit }),
+		queryKey: ["games"],
+		queryFn: ({ signal }) => getGames({ signal }),
 	});
 
 	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
 		useInfiniteQuery({
-			queryKey: ["listings"],
+			queryKey: ["listings", deferredSearch, filterType, filterGame, sortBy],
 			initialPageParam: 0,
 			queryFn: ({ pageParam, signal }) =>
 				getListings({
 					signal,
 					limit: pageSize,
 					offset: pageParam,
+					search: deferredSearch || undefined,
+					type: filterType === "ALL" ? undefined : filterType,
+					gameId: filterGame === "ALL" ? undefined : filterGame,
+					sortBy,
 				}),
 			getNextPageParam: (lastPage, allPages) => {
 				if (lastPage.length < pageSize) return undefined;
@@ -71,47 +73,15 @@ function App() {
 		return () => observer.disconnect();
 	}, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-	const normalizedSearch = search.trim().toLowerCase();
+	// const normalizedSearch = search.trim().toLowerCase();
 	const handleFilterTypeChange = (
 		event: React.ChangeEvent<HTMLSelectElement>,
 	) => {
 		setFilterType(event.target.value as ListingType | "ALL");
 	};
 	const handleSortByChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-		setSortBy(event.target.value as "DATE" | "POPULARITY" | "RELEVANCE");
+		setSortBy(event.target.value as ListingSortBy);
 	};
-	const filteredListings = (listings ?? [])
-		.filter((l) => {
-			const gameName = l.game.name.toLowerCase();
-			const matchesSearch =
-				normalizedSearch.length === 0 ||
-				l.title.toLowerCase().includes(normalizedSearch) ||
-				gameName.includes(normalizedSearch);
-			const matchesType = filterType === "ALL" || l.type === filterType;
-			const matchesGame = filterGame === "ALL" || l.game.id === filterGame;
-			return matchesSearch && matchesType && matchesGame;
-		})
-		.sort((a, b) => {
-			if (sortBy === "DATE") {
-				return (
-					new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-				);
-			}
-			if (sortBy === "POPULARITY") {
-				return b.views - a.views;
-			}
-			if (sortBy === "RELEVANCE") {
-				// Simple relevance: if search matches title, it's more relevant
-				if (normalizedSearch.length > 0) {
-					const aTitleMatch = a.title.toLowerCase().includes(normalizedSearch);
-					const bTitleMatch = b.title.toLowerCase().includes(normalizedSearch);
-					if (aTitleMatch && !bTitleMatch) return -1;
-					if (!aTitleMatch && bTitleMatch) return 1;
-				}
-				return 0;
-			}
-			return 0;
-		});
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
@@ -143,7 +113,7 @@ function App() {
 					</Link>
 				</div>
 				<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-					{games?.map((game: Game) => (
+					{games?.slice(0, 6).map((game: Game) => (
 						<GameCard key={game.id} game={game} />
 					))}
 				</div>
@@ -227,7 +197,7 @@ function App() {
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{filteredListings.map((listing) => (
+					{listings.map((listing) => (
 						<ListingCard key={listing.id} listing={listing} />
 					))}
 					{isFetchingNextPage && (
@@ -235,7 +205,7 @@ function App() {
 							Carregando mais anúncios...
 						</div>
 					)}
-					{!isFetchingNextPage && filteredListings.length === 0 && (
+					{!isFetchingNextPage && listings.length === 0 && (
 						<div className="col-span-full py-20 text-center glass-panel">
 							<Info className="w-12 h-12 text-gray-600 mx-auto mb-4" />
 							<p className="text-gray-400">

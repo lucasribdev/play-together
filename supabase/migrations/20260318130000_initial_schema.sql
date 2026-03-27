@@ -272,6 +272,9 @@ $$;
 create or replace function public.get_listings(
   p_game_id uuid default null,
   p_user_id uuid default null,
+  p_search text default null,
+  p_type public.type default null,
+  p_sort_by text default 'DATE',
   p_limit int default 12,
   p_offset int default 0
 )
@@ -305,48 +308,109 @@ stable
 security invoker
 set search_path = public
 as $$
+  with listing_stats as (
+    select
+      l.id,
+      l.user_id,
+      l.game_id,
+      g.name as game_name,
+      l.type,
+      l.title,
+      l.description,
+      l.ip,
+      l.tags,
+      l.discord_invite,
+      l.views,
+      l.active,
+      count(ll.id)::bigint as likes_count,
+      coalesce(bool_or(ll.user_id = auth.uid()), false) as user_liked,
+      l.created_at,
+      l.updated_at,
+      g.cover_url as game_cover_url,
+      g.genres as game_genres,
+      g.release_date as game_release_date,
+      g.website as game_website,
+      p.username as profile_username,
+      p.full_name as profile_full_name,
+      p.avatar_url as profile_avatar_url,
+      (
+        case
+          when p_search is null then 0
+          else
+            (case when l.title ilike '%' || p_search || '%' then 3 else 0 end) +
+            (case when g.name ilike '%' || p_search || '%' then 2 else 0 end) +
+            (case when coalesce(l.description, '') ilike '%' || p_search || '%' then 1 else 0 end) +
+            (
+              case
+                when exists (
+                  select 1
+                  from unnest(coalesce(l.tags, '{}')) as tag
+                  where tag ilike '%' || p_search || '%'
+                ) then 1
+                else 0
+              end
+            )
+        end
+      )::int as relevance_score
+    from public.listings l
+    join public.games g on g.id = l.game_id
+    join public.profiles p on p.id = l.user_id
+    left join public.listing_likes ll on ll.listing_id = l.id
+    where l.active = true
+      and (p_game_id is null or l.game_id = p_game_id)
+      and (p_user_id is null or l.user_id = p_user_id)
+      and (p_type is null or l.type = p_type)
+      and (
+        p_search is null
+        or l.title ilike '%' || p_search || '%'
+        or coalesce(l.description, '') ilike '%' || p_search || '%'
+        or g.name ilike '%' || p_search || '%'
+        or exists (
+          select 1
+          from unnest(coalesce(l.tags, '{}')) as tag
+          where tag ilike '%' || p_search || '%'
+        )
+      )
+    group by
+      l.id,
+      g.name,
+      g.cover_url,
+      g.genres,
+      g.release_date,
+      g.website,
+      p.username,
+      p.full_name,
+      p.avatar_url
+  )
   select
-    l.id,
-    l.user_id,
-    l.game_id,
-    g.name as game_name,
-    l.type,
-    l.title,
-    l.description,
-    l.ip,
-    l.tags,
-    l.discord_invite,
-    l.views,
-    l.active,
-    count(ll.id)::bigint as likes_count,
-    coalesce(bool_or(ll.user_id = auth.uid()), false) as user_liked,
-    l.created_at,
-    l.updated_at,
-    g.cover_url as game_cover_url,
-    g.genres as game_genres,
-    g.release_date as game_release_date,
-    g.website as game_website,
-    p.username as profile_username,
-    p.full_name as profile_full_name,
-    p.avatar_url as profile_avatar_url
-  from public.listings l
-  join public.games g on g.id = l.game_id
-  join public.profiles p on p.id = l.user_id
-  left join public.listing_likes ll on ll.listing_id = l.id
-  where l.active = true
-    and (p_game_id is null or l.game_id = p_game_id)
-    and (p_user_id is null or l.user_id = p_user_id)
-  group by
-    l.id,
-    g.name,
-    g.cover_url,
-    g.genres,
-    g.release_date,
-    g.website,
-    p.username,
-    p.full_name,
-    p.avatar_url
-  order by l.created_at desc
+    id,
+    user_id,
+    game_id,
+    game_name,
+    type,
+    title,
+    description,
+    ip,
+    tags,
+    discord_invite,
+    views,
+    active,
+    likes_count,
+    user_liked,
+    created_at,
+    updated_at,
+    game_cover_url,
+    game_genres,
+    game_release_date,
+    game_website,
+    profile_username,
+    profile_full_name,
+    profile_avatar_url
+  from listing_stats
+  order by
+    case when p_sort_by = 'POPULARITY' then views end desc,
+    case when p_sort_by = 'RELEVANCE' then relevance_score end desc,
+    created_at desc
   limit p_limit
   offset p_offset;
 $$;
@@ -425,4 +489,4 @@ using (auth.uid() = user_id);
 grant execute on function public.increment_listing_views(uuid) to anon, authenticated;
 grant execute on function public.toggle_listing_like(uuid) to authenticated;
 grant execute on function public.get_listing_by_id(uuid) to anon, authenticated;
-grant execute on function public.get_listings(uuid, uuid, integer, integer) to anon, authenticated;
+grant execute on function public.get_listings(uuid, uuid, text, public.type, text, integer, integer) to anon, authenticated;

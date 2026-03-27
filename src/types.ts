@@ -1,4 +1,5 @@
 export type ListingType = "LFG" | "SERVER" | "COMMUNITY";
+export type ListingSortBy = "DATE" | "POPULARITY" | "RELEVANCE";
 
 export interface Game {
 	id: string;
@@ -150,4 +151,15 @@ export interface GetGamesParams {
 	limit?: number;
 	offset?: number;
 	search?: string;
+}
+
+export interface GetListingsParams {
+	signal?: AbortSignal;
+	limit: number;
+	offset: number;
+	gameId?: string;
+	userId?: string;
+	search?: string;
+	type?: ListingType;
+	sortBy?: ListingSortBy;
 }

@@ -2,6 +2,7 @@ import type {
 	CreateListingInput,
 	Game,
 	GetGamesParams,
+	GetListingsParams,
 	Listing,
 	Profile,
 } from "@/types";
@@ -64,11 +65,12 @@ export async function getListings({
 	signal,
 	limit,
 	offset,
-}: {
-	signal?: AbortSignal;
-	limit: number;
-	offset: number;
-}): Promise<Listing[]> {
+	gameId,
+	userId,
+	search,
+	type,
+	sortBy,
+}: GetListingsParams): Promise<Listing[]> {
 	const url = new URL("/api/listings", window.location.origin);
 
 	if (limit) {
@@ -77,6 +79,26 @@ export async function getListings({
 
 	if (offset) {
 		url.searchParams.set("offset", String(offset));
+	}
+
+	if (gameId) {
+		url.searchParams.set("gameId", gameId);
+	}
+
+	if (userId) {
+		url.searchParams.set("userId", userId);
+	}
+
+	if (search) {
+		url.searchParams.set("search", search);
+	}
+
+	if (type) {
+		url.searchParams.set("type", type);
+	}
+
+	if (sortBy) {
+		url.searchParams.set("sortBy", sortBy);
 	}
 
 	const response = await fetch(url.toString(), {
