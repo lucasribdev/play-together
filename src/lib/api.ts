@@ -8,6 +8,17 @@ import type {
 } from "@/types";
 import { supabase } from "@/utils/supabase";
 
+type QueryValue = string | number | null | undefined;
+
+type ApiRequestOptions = {
+	body?: BodyInit;
+	headers?: HeadersInit;
+	method?: string;
+	query?: Record<string, QueryValue>;
+	requireAuth?: boolean;
+	signal?: AbortSignal;
+};
+
 async function getAuthHeaders() {
 	const { data } = await supabase.auth.getSession();
 	const accessToken = data.session?.access_token;
@@ -16,7 +27,82 @@ async function getAuthHeaders() {
 		? {
 				Authorization: `Bearer ${accessToken}`,
 			}
-		: undefined;
+			: undefined;
+}
+
+function createApiUrl(path: string, query?: Record<string, QueryValue>) {
+	const url = new URL(path, window.location.origin);
+
+	if (!query) {
+		return url.toString();
+	}
+
+	for (const [key, value] of Object.entries(query)) {
+		if (value === undefined || value === null || value === "") {
+			continue;
+		}
+
+		url.searchParams.set(key, String(value));
+	}
+
+	return url.toString();
+}
+
+async function apiRequest<T>(
+	path: string,
+	{
+		body,
+		headers,
+		method,
+		query,
+		requireAuth = false,
+		signal,
+	}: ApiRequestOptions = {},
+): Promise<T> {
+	const authHeaders = requireAuth ? await getAuthHeaders() : undefined;
+	const response = await fetch(createApiUrl(path, query), {
+		method,
+		body,
+		signal,
+		headers: {
+			...authHeaders,
+			...headers,
+		},
+	});
+
+	if (!response.ok) {
+		throw new Error(`Request failed: ${method ?? "GET"} ${path}`);
+	}
+
+	return response.json() as Promise<T>;
+}
+
+function getListingsQuery({
+	gameId,
+	limit,
+	offset,
+	search,
+	sortBy,
+	type,
+	userId,
+}: {
+	gameId?: string;
+	limit?: number;
+	offset?: number;
+	search?: string;
+	sortBy?: string;
+	type?: string;
+	userId?: string;
+}) {
+	return {
+		gameId,
+		limit,
+		offset,
+		search,
+		sortBy,
+		type,
+		userId,
+	};
 }
 
 export async function getGames({
@@ -25,40 +111,21 @@ export async function getGames({
 	offset,
 	search,
 }: GetGamesParams): Promise<Game[]> {
-	const url = new URL("/api/games", window.location.origin);
-
-	if (limit) {
-		url.searchParams.set("limit", String(limit));
-	}
-
-	if (offset) {
-		url.searchParams.set("offset", String(offset));
-	}
-
-	if (search) {
-		url.searchParams.set("search", String(search));
-	}
-
-	const response = await fetch(url.toString(), { signal });
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch games");
-	}
-
-	return response.json();
+	return apiRequest<Game[]>("/api/games", {
+		signal,
+		query: {
+			limit,
+			offset,
+			search,
+		},
+	});
 }
 
 export async function getGameBySlug(
 	slug: string,
 	signal?: AbortSignal,
 ): Promise<Game> {
-	const response = await fetch(`/api/games/${slug}`, { signal });
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch game");
-	}
-
-	return response.json() as Promise<Game>;
+	return apiRequest<Game>(`/api/games/${slug}`, { signal });
 }
 
 export async function getListings({
@@ -71,62 +138,30 @@ export async function getListings({
 	type,
 	sortBy,
 }: GetListingsParams): Promise<Listing[]> {
-	const url = new URL("/api/listings", window.location.origin);
-
-	if (limit) {
-		url.searchParams.set("limit", String(limit));
-	}
-
-	if (offset) {
-		url.searchParams.set("offset", String(offset));
-	}
-
-	if (gameId) {
-		url.searchParams.set("gameId", gameId);
-	}
-
-	if (userId) {
-		url.searchParams.set("userId", userId);
-	}
-
-	if (search) {
-		url.searchParams.set("search", search);
-	}
-
-	if (type) {
-		url.searchParams.set("type", type);
-	}
-
-	if (sortBy) {
-		url.searchParams.set("sortBy", sortBy);
-	}
-
-	const response = await fetch(url.toString(), {
+	return apiRequest<Listing[]>("/api/listings", {
 		signal,
-		headers: await getAuthHeaders(),
+		requireAuth: true,
+		query: getListingsQuery({
+			limit,
+			offset,
+			gameId,
+			userId,
+			search,
+			type,
+			sortBy,
+		}),
 	});
-
-	if (!response.ok) throw new Error("Failed to fetch listings");
-	return response.json() as Promise<Listing[]>;
 }
 
 export async function getListingsByGameId(
 	id: string,
 	signal?: AbortSignal,
 ): Promise<Listing[]> {
-	const response = await fetch(
-		`/api/listings?gameId=${encodeURIComponent(id)}`,
-		{
-			signal,
-			headers: await getAuthHeaders(),
-		},
-	);
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch listings");
-	}
-
-	return response.json() as Promise<Listing[]>;
+	return apiRequest<Listing[]>("/api/listings", {
+		signal,
+		requireAuth: true,
+		query: getListingsQuery({ gameId: id }),
+	});
 }
 
 export async function getListingsByUserId({
@@ -140,27 +175,15 @@ export async function getListingsByUserId({
 	offset?: number;
 	userId: string;
 }): Promise<Listing[]> {
-	const url = new URL("/api/listings", window.location.origin);
-	url.searchParams.set("userId", userId);
-
-	if (limit) {
-		url.searchParams.set("limit", String(limit));
-	}
-
-	if (offset) {
-		url.searchParams.set("offset", String(offset));
-	}
-
-	const response = await fetch(url.toString(), {
+	return apiRequest<Listing[]>("/api/listings", {
 		signal,
-		headers: await getAuthHeaders(),
+		requireAuth: true,
+		query: getListingsQuery({
+			userId,
+			limit,
+			offset,
+		}),
 	});
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch listings");
-	}
-
-	return response.json() as Promise<Listing[]>;
 }
 
 export async function getLikedListingsByUserId({
@@ -174,77 +197,51 @@ export async function getLikedListingsByUserId({
 	limit?: number;
 	offset?: number;
 }): Promise<Listing[]> {
-	const url = new URL(
+	return apiRequest<Listing[]>(
 		`/api/users/${encodeURIComponent(userId)}/liked-listings`,
-		window.location.origin,
+		{
+			signal,
+			requireAuth: true,
+			query: {
+				limit,
+				offset,
+			},
+		},
 	);
-
-	if (limit) {
-		url.searchParams.set("limit", String(limit));
-	}
-
-	if (offset) {
-		url.searchParams.set("offset", String(offset));
-	}
-
-	const response = await fetch(url.toString(), {
-		signal,
-		headers: await getAuthHeaders(),
-	});
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch liked listings");
-	}
-
-	return response.json() as Promise<Listing[]>;
 }
 
 export async function getListingBySlug(
 	slug: string,
 	signal?: AbortSignal,
 ): Promise<Listing> {
-	const response = await fetch(`/api/listings/${slug}`, {
+	return apiRequest<Listing>(`/api/listings/${slug}`, {
 		signal,
-		headers: await getAuthHeaders(),
+		requireAuth: true,
 	});
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch listing");
-	}
-
-	return response.json() as Promise<Listing>;
 }
 
 export async function getProfile(
 	profileFullName: string,
 	signal?: AbortSignal,
 ): Promise<Profile> {
-	const response = await fetch(`/api/profile/${profileFullName}`, {
+	return apiRequest<Profile>(`/api/profile/${profileFullName}`, {
 		signal,
-		headers: await getAuthHeaders(),
+		requireAuth: true,
 	});
-
-	if (!response.ok) {
-		throw new Error("Failed to fetch profile");
-	}
-
-	return response.json() as Promise<Profile>;
 }
 
 export async function incrementListingViews(
 	slug: string,
 	signal?: AbortSignal,
 ): Promise<number> {
-	const response = await fetch(`/api/listings/${slug}/views`, {
-		method: "POST",
-		signal,
-	});
+	const payload = await apiRequest<{ views: number }>(
+		`/api/listings/${slug}/views`,
+		{
+			method: "POST",
+			signal,
+		},
+	);
 
-	if (!response.ok) {
-		throw new Error("Failed to increment listing views");
-	}
-
-	const payload = (await response.json()) as { views: number };
 	return payload.views;
 }
 
@@ -252,31 +249,24 @@ export async function toggleListingLike(
 	slug: string,
 	signal?: AbortSignal,
 ): Promise<void> {
-	const response = await fetch(`/api/listings/${slug}/likes`, {
+	await apiRequest(`/api/listings/${slug}/likes`, {
 		method: "POST",
-		headers: await getAuthHeaders(),
+		requireAuth: true,
 		signal,
 	});
-
-	if (!response.ok) {
-		throw new Error("Failed to toggle listing like");
-	}
 }
 
 export async function createListing(
 	input: CreateListingInput,
 	signal?: AbortSignal,
 ): Promise<Listing> {
-	const response = await fetch("/api/listings", {
+	return apiRequest<Listing>("/api/listings", {
 		method: "POST",
-		headers: await getAuthHeaders(),
+		requireAuth: true,
+		headers: {
+			"Content-Type": "application/json",
+		},
 		body: JSON.stringify(input),
 		signal,
 	});
-
-	if (!response.ok) {
-		throw new Error("Failed to create listing");
-	}
-
-	return response.json() as Promise<Listing>;
 }
