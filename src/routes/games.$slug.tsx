@@ -4,6 +4,7 @@ import { Calendar, Globe, PlusCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import ListingCard from "@/components/ListingCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getGameBySlug, getListingsByGameId } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { ListingType } from "@/types";
@@ -14,22 +15,96 @@ export const Route = createFileRoute("/games/$slug")({
 	},
 	component: GameDetails,
 });
+const gameDetailsListingSkeletonIds = [
+	"game-details-listing-1",
+	"game-details-listing-2",
+	"game-details-listing-3",
+	"game-details-listing-4",
+	"game-details-listing-5",
+	"game-details-listing-6",
+];
+
+function ListingCardSkeleton() {
+	return (
+		<div className="glass-panel p-5 flex flex-col gap-4">
+			<div className="flex justify-between items-start">
+				<Skeleton className="h-5 w-28 rounded-full" />
+				<Skeleton className="h-5 w-10" />
+			</div>
+			<div className="space-y-2">
+				<Skeleton className="h-6 w-3/4" />
+				<Skeleton className="h-4 w-1/2" />
+			</div>
+			<div className="space-y-2">
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
+			</div>
+			<div className="flex gap-2">
+				<Skeleton className="h-5 w-14 rounded-full" />
+				<Skeleton className="h-5 w-16 rounded-full" />
+			</div>
+		</div>
+	);
+}
+
+function GameDetailsSkeleton() {
+	return (
+		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+			<div className="relative h-[300px] rounded-3xl overflow-hidden border border-border-dark">
+				<Skeleton className="h-full w-full rounded-none" />
+				<div className="absolute inset-0 bg-gradient-to-t from-bg-dark/90 via-bg-dark/30 to-transparent flex flex-col justify-end p-8">
+					<div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+						<div className="space-y-4">
+							<Skeleton className="h-12 w-72 max-w-full" />
+							<div className="flex gap-4">
+								<Skeleton className="h-4 w-28" />
+								<Skeleton className="h-4 w-24" />
+							</div>
+							<div className="flex gap-2">
+								<Skeleton className="h-6 w-16 rounded-full" />
+								<Skeleton className="h-6 w-20 rounded-full" />
+								<Skeleton className="h-6 w-14 rounded-full" />
+							</div>
+						</div>
+						<Skeleton className="h-11 w-40 rounded-xl" />
+					</div>
+				</div>
+			</div>
+			<div className="space-y-6">
+				<div className="flex gap-8 border-b border-border-dark pb-4">
+					<Skeleton className="h-5 w-24" />
+					<Skeleton className="h-5 w-28" />
+					<Skeleton className="h-5 w-32" />
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{gameDetailsListingSkeletonIds.map((id) => (
+						<ListingCardSkeleton key={id} />
+					))}
+				</div>
+			</div>
+		</div>
+	);
+}
 
 function GameDetails() {
 	const [activeTab, setActiveTab] = useState<ListingType>("SERVER");
 
 	const { slug } = Route.useLoaderData();
 
-	const { data: game } = useQuery({
+	const { data: game, isLoading: isGameLoading } = useQuery({
 		queryKey: ["game", slug],
 		queryFn: ({ signal }) => getGameBySlug(slug, signal),
 	});
 
-	const { data: listingsData } = useQuery({
+	const { data: listingsData, isLoading: isListingsLoading } = useQuery({
 		queryKey: ["listings", slug, game?.id],
 		queryFn: ({ signal }) => getListingsByGameId(game?.id ?? "", signal),
 		enabled: Boolean(game?.id),
 	});
+
+	if (isGameLoading) {
+		return <GameDetailsSkeleton />;
+	}
 
 	if (!game)
 		return <div className="p-20 text-center">Jogo não encontrado.</div>;
@@ -124,10 +199,14 @@ function GameDetails() {
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{listings?.map((listing) => (
-						<ListingCard key={listing.id} listing={listing} />
-					))}
-					{listings?.length === 0 && (
+					{isListingsLoading
+						? gameDetailsListingSkeletonIds.map((id) => (
+								<ListingCardSkeleton key={id} />
+							))
+						: listings?.map((listing) => (
+								<ListingCard key={listing.id} listing={listing} />
+							))}
+					{!isListingsLoading && listings?.length === 0 && (
 						<div className="col-span-full py-20 text-center glass-panel">
 							<p className="text-gray-500">
 								Ainda não há anúncios nesta categoria para {game.name}.

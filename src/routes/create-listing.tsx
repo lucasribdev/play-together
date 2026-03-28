@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import TypeOption from "@/components/TypeOption";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { createListing, getGameBySlug, getGames } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,23 @@ type CreateListingSearch = {
 };
 
 const pageSize = 20;
+const gameOptionSkeletonIds = [
+	"create-game-1",
+	"create-game-2",
+	"create-game-3",
+	"create-game-4",
+	"create-game-5",
+	"create-game-6",
+];
+
+function GameOptionSkeleton() {
+	return (
+		<div className="glass-panel p-4 flex flex-col items-center gap-3">
+			<Skeleton className="h-12 w-12 rounded-lg" />
+			<Skeleton className="h-4 w-20" />
+		</div>
+	);
+}
 
 export const Route = createFileRoute("/create-listing")({
 	validateSearch: (search: CreateListingSearch & SearchSchemaInput) => ({
@@ -73,22 +91,27 @@ function RouteComponent() {
 
 	const [loadMoreNode, setLoadMoreNode] = useState<HTMLDivElement | null>(null);
 
-	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-		useInfiniteQuery({
-			queryKey: ["games", debouncedSearch],
-			initialPageParam: 0,
-			queryFn: ({ pageParam, signal }) =>
-				getGames({
-					signal,
-					limit: pageSize,
-					offset: pageParam,
-					search: debouncedSearch,
-				}),
-			getNextPageParam: (lastPage, allPages) => {
-				if (lastPage.length < pageSize) return undefined;
-				return allPages.flat().length;
-			},
-		});
+	const {
+		data,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+		isLoading: isGamesLoading,
+	} = useInfiniteQuery({
+		queryKey: ["games", debouncedSearch],
+		initialPageParam: 0,
+		queryFn: ({ pageParam, signal }) =>
+			getGames({
+				signal,
+				limit: pageSize,
+				offset: pageParam,
+				search: debouncedSearch,
+			}),
+		getNextPageParam: (lastPage, allPages) => {
+			if (lastPage.length < pageSize) return undefined;
+			return allPages.flat().length;
+		},
+	});
 
 	const games = data?.pages.flat() ?? [];
 	const { data: selectedGameFromSlug } = useQuery({
@@ -292,31 +315,35 @@ function RouteComponent() {
 						</div>
 
 						<div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-							{games?.map((game) => (
-								<button
-									type="button"
-									key={game.id}
-									onClick={() => {
-										setSelectedGame(game.id);
-										setSuggestedGame(null);
-										setStep(3);
-									}}
-									className={cn(
-										"glass-panel p-4 flex flex-col items-center gap-3 transition-all hover:border-brand-primary",
-										selectedGame === game.id &&
-											"border-brand-primary bg-brand-primary/5",
-									)}
-								>
-									<img
-										alt={`${game.name} cover`}
-										src={game.coverUrl}
-										className="w-12 h-12 rounded-lg object-cover"
-										referrerPolicy="no-referrer"
-									/>
-									<span className="font-bold text-sm">{game.name}</span>
-								</button>
-							))}
-							{search.trim() && games?.length === 0 && (
+							{isGamesLoading
+								? gameOptionSkeletonIds.map((id) => (
+										<GameOptionSkeleton key={id} />
+									))
+								: games?.map((game) => (
+										<button
+											type="button"
+											key={game.id}
+											onClick={() => {
+												setSelectedGame(game.id);
+												setSuggestedGame(null);
+												setStep(3);
+											}}
+											className={cn(
+												"glass-panel p-4 flex flex-col items-center gap-3 transition-all hover:border-brand-primary",
+												selectedGame === game.id &&
+													"border-brand-primary bg-brand-primary/5",
+											)}
+										>
+											<img
+												alt={`${game.name} cover`}
+												src={game.coverUrl}
+												className="w-12 h-12 rounded-lg object-cover"
+												referrerPolicy="no-referrer"
+											/>
+											<span className="font-bold text-sm">{game.name}</span>
+										</button>
+									))}
+							{!isGamesLoading && search.trim() && games?.length === 0 && (
 								<div className="col-span-full py-8 text-center space-y-4">
 									<p className="text-gray-500">
 										Não encontrou o jogo "{search}"?

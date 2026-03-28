@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import {
 	getListingBySlug,
@@ -27,6 +28,72 @@ export const Route = createFileRoute("/listings/$slug")({
 	component: ListingDetails,
 });
 
+function ListingDetailsSkeleton() {
+	return (
+		<div className="min-h-screen relative">
+			<div className="relative z-10 max-w-6xl mx-auto px-4 py-12 space-y-8">
+				<Skeleton className="h-5 w-40" />
+				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+					<div className="lg:col-span-8 space-y-8">
+						<div className="glass-panel p-8 md:p-12 space-y-8">
+							<div className="space-y-6">
+								<div className="flex items-center gap-4">
+									<Skeleton className="h-6 w-20 rounded-full" />
+									<Skeleton className="h-2 w-2 rounded-full" />
+									<Skeleton className="h-4 w-32" />
+								</div>
+								<Skeleton className="h-12 w-4/5" />
+								<Skeleton className="h-12 w-3/5" />
+								<div className="space-y-3">
+									<Skeleton className="h-5 w-full" />
+									<Skeleton className="h-5 w-full" />
+									<Skeleton className="h-5 w-2/3" />
+								</div>
+								<div className="flex gap-2">
+									<Skeleton className="h-6 w-16 rounded-full" />
+									<Skeleton className="h-6 w-20 rounded-full" />
+									<Skeleton className="h-6 w-14 rounded-full" />
+								</div>
+							</div>
+						</div>
+						<div className="glass-panel p-6 flex items-center justify-between">
+							<div className="flex items-center gap-4">
+								<Skeleton className="h-16 w-16 rounded-xl" />
+								<div className="space-y-2">
+									<Skeleton className="h-3 w-24" />
+									<Skeleton className="h-6 w-40" />
+								</div>
+							</div>
+							<Skeleton className="h-6 w-6 rounded-full" />
+						</div>
+					</div>
+					<div className="lg:col-span-4 space-y-6">
+						<div className="glass-panel p-8 space-y-8">
+							<div className="flex items-center gap-4 pb-8 border-b border-white/5">
+								<Skeleton className="h-14 w-14 rounded-2xl" />
+								<div className="space-y-2">
+									<Skeleton className="h-3 w-20" />
+									<Skeleton className="h-6 w-28" />
+								</div>
+							</div>
+							<div className="space-y-4">
+								<Skeleton className="h-3 w-28" />
+								<div className="grid grid-cols-1 gap-3">
+									<Skeleton className="h-14 w-full rounded-2xl" />
+									<div className="grid grid-cols-2 gap-3">
+										<Skeleton className="h-14 w-full rounded-2xl" />
+										<Skeleton className="h-14 w-full rounded-2xl" />
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function ListingDetails() {
 	const [likeState, setLikeState] = useState({
 		likesCount: 0,
@@ -40,7 +107,7 @@ function ListingDetails() {
 
 	const { slug } = Route.useLoaderData();
 
-	const { data: listing } = useQuery({
+	const { data: listing, isLoading } = useQuery({
 		queryKey: ["listing", slug],
 		queryFn: ({ signal }) => getListingBySlug(slug, signal),
 	});
@@ -109,6 +176,10 @@ function ListingDetails() {
 			]);
 		},
 	});
+
+	if (isLoading) {
+		return <ListingDetailsSkeleton />;
+	}
 
 	if (!listing) {
 		return <div className="p-20 text-center">Anúncio não encontrado.</div>;

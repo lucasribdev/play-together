@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import GameCard from "@/components/GameCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getGames } from "@/lib/api";
 
 export const Route = createFileRoute("/games/")({
@@ -10,6 +11,31 @@ export const Route = createFileRoute("/games/")({
 });
 
 const pageSize = 20;
+const gameSkeletonIds = [
+	"games-index-1",
+	"games-index-2",
+	"games-index-3",
+	"games-index-4",
+	"games-index-5",
+	"games-index-6",
+	"games-index-7",
+	"games-index-8",
+];
+
+function GameCardSkeleton() {
+	return (
+		<div className="relative aspect-video rounded-xl overflow-hidden border border-border-dark bg-card-dark">
+			<Skeleton className="h-full w-full rounded-none" />
+			<div className="absolute inset-x-0 bottom-0 space-y-3 p-4">
+				<Skeleton className="h-6 w-2/3" />
+				<div className="flex gap-2">
+					<Skeleton className="h-4 w-12 rounded-full" />
+					<Skeleton className="h-4 w-16 rounded-full" />
+				</div>
+			</div>
+		</div>
+	);
+}
 
 function Games() {
 	const [search, setSearch] = useState("");
@@ -25,7 +51,7 @@ function Games() {
 
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-	const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+	const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
 		useInfiniteQuery({
 			queryKey: ["games", debouncedSearch],
 			initialPageParam: 0,
@@ -83,9 +109,9 @@ function Games() {
 				</div>
 			</div>
 			<div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-				{games?.map((game) => (
-					<GameCard key={game.id} game={game} />
-				))}
+				{isLoading
+					? gameSkeletonIds.map((id) => <GameCardSkeleton key={id} />)
+					: games?.map((game) => <GameCard key={game.id} game={game} />)}
 			</div>
 			<div ref={loadMoreRef} />
 		</div>

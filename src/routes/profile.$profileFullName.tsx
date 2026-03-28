@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Heart, PlusCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
 import ListingCard from "@/components/ListingCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
 	getLikedListingsByUserId,
 	getListingsByUserId,
@@ -17,6 +18,71 @@ export const Route = createFileRoute("/profile/$profileFullName")({
 });
 
 const pageSize = 6;
+const profileSectionSkeletonIds = ["profile-owned", "profile-liked"];
+const profileListingSkeletonIds = [
+	"profile-listing-1",
+	"profile-listing-2",
+	"profile-listing-3",
+];
+
+function ListingCardSkeleton() {
+	return (
+		<div className="glass-panel p-5 flex flex-col gap-4">
+			<div className="flex justify-between items-start">
+				<Skeleton className="h-5 w-28 rounded-full" />
+				<Skeleton className="h-5 w-10" />
+			</div>
+			<div className="space-y-2">
+				<Skeleton className="h-6 w-3/4" />
+				<Skeleton className="h-4 w-1/2" />
+			</div>
+			<div className="space-y-2">
+				<Skeleton className="h-4 w-full" />
+				<Skeleton className="h-4 w-5/6" />
+			</div>
+			<div className="pt-4 border-t border-border-dark flex justify-between items-center">
+				<Skeleton className="h-4 w-24" />
+				<Skeleton className="h-4 w-20" />
+			</div>
+		</div>
+	);
+}
+
+function ProfileSkeleton() {
+	return (
+		<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
+			<div className="flex flex-col md:flex-row items-center gap-8 glass-panel p-8">
+				<Skeleton className="h-32 w-32 rounded-3xl shrink-0" />
+				<div className="w-full max-w-sm space-y-3">
+					<Skeleton className="h-10 w-2/3" />
+					<Skeleton className="h-5 w-1/2" />
+					<div className="flex gap-4 pt-4">
+						<div className="space-y-2">
+							<Skeleton className="h-8 w-10" />
+							<Skeleton className="h-3 w-16" />
+						</div>
+						<div className="space-y-2">
+							<Skeleton className="h-8 w-10" />
+							<Skeleton className="h-3 w-16" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+				{profileSectionSkeletonIds.map((sectionId) => (
+					<section className="space-y-6" key={sectionId}>
+						<Skeleton className="h-8 w-40" />
+						<div className="space-y-4">
+							{profileListingSkeletonIds.map((listingId) => (
+								<ListingCardSkeleton key={listingId} />
+							))}
+						</div>
+					</section>
+				))}
+			</div>
+		</div>
+	);
+}
 
 function Profile() {
 	const listingsLoadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -134,7 +200,7 @@ function Profile() {
 		: null;
 
 	if (isProfileLoading) {
-		return <div className="p-20 text-center">Carregando perfil...</div>;
+		return <ProfileSkeleton />;
 	}
 
 	if (!profile) {
@@ -200,9 +266,11 @@ function Profile() {
 						<PlusCircle className="text-brand-primary" /> Meus Anúncios
 					</h2>
 					<div className="space-y-4">
-						{listings?.map((l) => (
-							<ListingCard key={l.id} listing={l} />
-						))}
+						{isListingsLoading
+							? profileListingSkeletonIds.map((id) => (
+									<ListingCardSkeleton key={id} />
+								))
+							: listings?.map((l) => <ListingCard key={l.id} listing={l} />)}
 						{isFetchingNextListingsPage && (
 							<p className="text-sm text-gray-400 text-center py-4">
 								Carregando mais anúncios...
@@ -222,9 +290,13 @@ function Profile() {
 						<Heart className="text-red-500" /> Favoritos
 					</h2>
 					<div className="space-y-4">
-						{likedListings?.map((l) => (
-							<ListingCard key={l.id} listing={l} />
-						))}
+						{isLikedListingsLoading
+							? profileListingSkeletonIds.map((id) => (
+									<ListingCardSkeleton key={id} />
+								))
+							: likedListings?.map((l) => (
+									<ListingCard key={l.id} listing={l} />
+								))}
 						{isFetchingNextLikedListingsPage && (
 							<p className="text-sm text-gray-400 text-center py-4">
 								Carregando mais favoritos...
