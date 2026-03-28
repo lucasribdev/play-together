@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	ArrowLeft,
 	Check,
@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/types";
 import { normalizeDiscordInvite } from "@/utils/discord";
+import { getTypeText } from "@/utils/typeText";
 
 export const Route = createFileRoute("/listings/$slug")({
 	loader: async ({ params }) => {
@@ -99,6 +100,7 @@ function ListingDetails() {
 	const [copied, setCopied] = useState(false);
 	const [viewsCount, setViewsCount] = useState<number | null>(null);
 
+	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { session, isSessionLoading } = useAuth();
 
@@ -215,6 +217,15 @@ function ListingDetails() {
 		likeMutation.mutate();
 	};
 
+	const handleBack = () => {
+		if (window.history.length > 1) {
+			window.history.back();
+			return;
+		}
+
+		navigate({ to: "/games/$slug", params: { slug: listing.game.slug } });
+	};
+
 	return (
 		<div className="min-h-screen relative">
 			<div className="fixed inset-0 z-0">
@@ -228,14 +239,14 @@ function ListingDetails() {
 			</div>
 
 			<div className="relative z-10 max-w-6xl mx-auto px-4 py-12 space-y-8">
-				<Link
-					to="/games/$slug"
-					params={{ slug: listing.game.slug }}
+				<button
+					type="button"
+					onClick={handleBack}
 					className="inline-flex items-center gap-2 text-gray-400 hover:text-brand-primary transition-colors text-sm font-bold group"
 				>
 					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-					Voltar para {listing.game.name}
-				</Link>
+					Voltar para página anterior
+				</button>
 
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 					{/* Main Content */}
@@ -248,7 +259,7 @@ function ListingDetails() {
 							<div className="space-y-6">
 								<div className="flex items-center gap-4">
 									<span className="px-3 py-1 rounded-full text-[10px] font-black border border-brand-primary/30 bg-brand-primary/10 text-brand-primary uppercase tracking-[0.2em]">
-										{listing.type}
+										{getTypeText(listing.type)}
 									</span>
 									<div className="h-1 w-1 rounded-full bg-gray-600" />
 									<span className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">

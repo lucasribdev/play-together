@@ -36,7 +36,6 @@ Notes:
 
 Seed data:
 
-- `supabase/seed.sql`
   - Creates local sample users, profiles, games, listings and likes.
   - Gives enough data to test list/detail pages and like counts locally.
 - Apply migrations and seed together with:
