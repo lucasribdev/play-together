@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import GameArtwork, { isManualGame } from "@/components/GameArtwork";
+import GameArtwork, { hasCoverUrl } from "@/components/GameArtwork";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -234,12 +234,12 @@ function ListingDetails() {
 					game={listing.game}
 					variant="hero"
 					className={
-						isManualGame(listing.game)
+						hasCoverUrl(listing.game)
 							? "scale-110 opacity-60"
 							: "object-cover opacity-20 blur-xl scale-110"
 					}
 					overlayClassName={
-						isManualGame(listing.game) ? "bg-black/35" : undefined
+						hasCoverUrl(listing.game) ? "bg-black/35" : undefined
 					}
 				/>
 				<div className="absolute inset-0 bg-gradient-to-b from-bg-dark/50 via-bg-dark to-bg-dark" />

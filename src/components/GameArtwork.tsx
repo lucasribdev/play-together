@@ -48,7 +48,7 @@ const variantStyles: Record<
 	},
 };
 
-export function isManualGame(game: Pick<Game, "coverUrl">) {
+export function hasCoverUrl(game: Pick<Game, "coverUrl">) {
 	return game.coverUrl === "";
 }
 
@@ -68,7 +68,7 @@ export default function GameArtwork({
 	className,
 	overlayClassName,
 }: GameArtworkProps) {
-	if (!isManualGame(game)) {
+	if (!hasCoverUrl(game)) {
 		return (
 			<img
 				src={game.coverUrl}
