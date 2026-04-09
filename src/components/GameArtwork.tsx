@@ -68,7 +68,6 @@ export default function GameArtwork({
 	className,
 	overlayClassName,
 }: GameArtworkProps) {
-	console.log("GameArtwork rendered for:", game);
 	if (!hasCoverUrl(game)) {
 		return (
 			<img
