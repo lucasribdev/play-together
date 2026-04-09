@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import GameArtwork, { isManualGame } from "@/components/GameArtwork";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -229,11 +230,17 @@ function ListingDetails() {
 	return (
 		<div className="min-h-screen relative">
 			<div className="fixed inset-0 z-0">
-				<img
-					src={listing.game.coverUrl}
-					alt={`${listing.game.name} cover`}
-					className="w-full h-full object-cover opacity-20 blur-xl scale-110"
-					referrerPolicy="no-referrer"
+				<GameArtwork
+					game={listing.game}
+					variant="hero"
+					className={
+						isManualGame(listing.game)
+							? "scale-110 opacity-60"
+							: "object-cover opacity-20 blur-xl scale-110"
+					}
+					overlayClassName={
+						isManualGame(listing.game) ? "bg-black/35" : undefined
+					}
 				/>
 				<div className="absolute inset-0 bg-gradient-to-b from-bg-dark/50 via-bg-dark to-bg-dark" />
 			</div>
@@ -245,7 +252,7 @@ function ListingDetails() {
 					className="inline-flex items-center gap-2 text-gray-400 hover:text-brand-primary transition-colors text-sm font-bold group"
 				>
 					<ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-					Voltar para página anterior
+					Voltar
 				</button>
 
 				<div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -298,11 +305,10 @@ function ListingDetails() {
 							className="glass-panel p-6 flex items-center justify-between group cursor-pointer"
 						>
 							<div className="flex items-center gap-4">
-								<img
-									src={listing.game.coverUrl}
-									className="w-16 h-16 rounded-xl object-cover border border-white/10"
-									alt={listing.game.name}
-									referrerPolicy="no-referrer"
+								<GameArtwork
+									game={listing.game}
+									variant="tile"
+									className="w-16 h-16 rounded-xl"
 								/>
 								<div>
 									<p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">

@@ -4,8 +4,6 @@ import { normalizeDiscordInvite } from "@/utils/discord";
 import { mapListingByIdRpc, mapListingsRpc } from "@/utils/mappers";
 import { createSupabaseUserClient, supabase } from "@/utils/supabase";
 
-const MANUAL_GAME_COVER_URL = "/logo512.png";
-
 export const Route = createFileRoute("/api/listings")({
 	server: {
 		handlers: {
@@ -83,7 +81,6 @@ export const Route = createFileRoute("/api/listings")({
 					const { data: resolvedGameId, error: resolvedGameError } =
 						await supabaseUser.rpc("get_or_create_manual_game", {
 							p_name: suggestedGameName,
-							p_cover_url: MANUAL_GAME_COVER_URL,
 						});
 
 					if (resolvedGameError || !resolvedGameId) {

@@ -9,6 +9,7 @@ import { MessageSquare, Search, Server, Users, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
+import GameArtwork from "@/components/GameArtwork";
 import TypeOption from "@/components/TypeOption";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
@@ -322,11 +323,10 @@ function RouteComponent() {
 													"border-brand-primary bg-brand-primary/5",
 											)}
 										>
-											<img
-												alt={`${game.name} cover`}
-												src={game.coverUrl}
-												className="w-12 h-12 rounded-lg object-cover"
-												referrerPolicy="no-referrer"
+											<GameArtwork
+												game={game}
+												variant="thumb"
+												className="w-12 h-12 rounded-lg"
 											/>
 											<span className="font-bold text-sm">{game.name}</span>
 										</button>

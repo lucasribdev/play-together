@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, Globe, PlusCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import GameArtwork from "@/components/GameArtwork";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGameBySlug, getListingsByGameId } from "@/lib/api";
@@ -114,12 +115,7 @@ function GameDetails() {
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
 			<div className="relative h-[300px] rounded-3xl overflow-hidden border border-border-dark">
-				<img
-					src={game.coverUrl}
-					alt={game.name}
-					className="w-full h-full object-cover opacity-50"
-					referrerPolicy="no-referrer"
-				/>
+				<GameArtwork game={game} variant="hero" className="opacity-80" />
 				<div className="absolute inset-0 bg-gradient-to-t from-bg-dark flex flex-col justify-end p-8">
 					<div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
 						<div className="space-y-2">
