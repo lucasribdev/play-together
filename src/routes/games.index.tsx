@@ -5,8 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import GameCard from "@/components/GameCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGames } from "@/lib/api";
+import { buildPageHead } from "@/lib/metadata";
 
 export const Route = createFileRoute("/games/")({
+	head: () =>
+		buildPageHead({
+			path: "/games",
+			title: "Explorar Jogos | JogaJunto",
+			description:
+				"Explore jogos e encontre comunidades, servidores e grupos ativos para jogar junto.",
+		}),
 	component: Games,
 });
 

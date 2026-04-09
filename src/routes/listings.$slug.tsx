@@ -19,6 +19,8 @@ import {
 	incrementListingViews,
 	toggleListingLike,
 } from "@/lib/api";
+import { buildPageHead, truncateDescription } from "@/lib/metadata";
+import { getListingPageData } from "@/lib/page-data";
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/types";
 import { normalizeDiscordInvite } from "@/utils/discord";
@@ -26,8 +28,26 @@ import { getTypeText } from "@/utils/typeText";
 
 export const Route = createFileRoute("/listings/$slug")({
 	loader: async ({ params }) => {
-		return { slug: params?.slug };
+		const slug = params?.slug;
+		return {
+			slug,
+			initialListing: await getListingPageData({ data: slug }),
+		};
 	},
+	head: ({ loaderData }) =>
+		buildPageHead({
+			path: `/listings/${loaderData.slug}`,
+			title: loaderData.initialListing
+				? `${loaderData.initialListing.title} | JogaJunto`
+				: "Anúncio | JogaJunto",
+			description: loaderData.initialListing
+				? truncateDescription(
+						loaderData.initialListing.description ||
+							`${getTypeText(loaderData.initialListing.type)} para ${loaderData.initialListing.game.name} criado por ${loaderData.initialListing.profile.fullName}.`,
+					)
+				: "Veja os detalhes deste anúncio no JogaJunto.",
+			image: loaderData.initialListing?.game.coverUrl || undefined,
+		}),
 	component: ListingDetails,
 });
 
@@ -105,11 +125,12 @@ function ListingDetails() {
 	const queryClient = useQueryClient();
 	const { session, isSessionLoading } = useAuth();
 
-	const { slug } = Route.useLoaderData();
+	const { slug, initialListing } = Route.useLoaderData();
 
 	const { data: listing, isLoading } = useQuery({
 		queryKey: ["listing", slug],
 		queryFn: ({ signal }) => getListingBySlug(slug, signal),
+		initialData: initialListing,
 	});
 
 	useEffect(() => {

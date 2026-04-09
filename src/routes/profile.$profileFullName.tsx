@@ -9,11 +9,31 @@ import {
 	getListingsByUserId,
 	getProfile,
 } from "@/lib/api";
+import { buildPageHead, truncateDescription } from "@/lib/metadata";
+import { getProfilePageData } from "@/lib/page-data";
 
 export const Route = createFileRoute("/profile/$profileFullName")({
 	loader: async ({ params }) => {
-		return { profileFullName: params?.profileFullName };
+		const profileFullName = params?.profileFullName;
+		return {
+			profileFullName,
+			initialProfile: await getProfilePageData({ data: profileFullName }),
+		};
 	},
+	head: ({ loaderData }) =>
+		buildPageHead({
+			path: `/profile/${loaderData.profileFullName}`,
+			title: loaderData.initialProfile
+				? `${loaderData.initialProfile.fullName} | JogaJunto`
+				: "Perfil | JogaJunto",
+			description: loaderData.initialProfile
+				? truncateDescription(
+						`${loaderData.initialProfile.fullName} está no JogaJunto. Veja anúncios publicados, curtidas e jogos em comum.`,
+					)
+				: "Veja este perfil no JogaJunto.",
+			image: loaderData.initialProfile?.avatarUrl || undefined,
+			type: "profile",
+		}),
 	component: Profile,
 });
 
@@ -85,11 +105,12 @@ function ProfileSkeleton() {
 }
 
 function Profile() {
-	const { profileFullName } = Route.useLoaderData();
+	const { profileFullName, initialProfile } = Route.useLoaderData();
 
 	const { data: profile, isLoading: isProfileLoading } = useQuery({
 		queryKey: ["profile", profileFullName],
 		queryFn: ({ signal }) => getProfile(profileFullName, signal),
+		initialData: initialProfile,
 	});
 
 	const {

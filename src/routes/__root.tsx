@@ -12,6 +12,7 @@ import BackToTop from "@/components/BackToTop";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
+import { buildPageHead } from "@/lib/metadata";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import appCss from "../styles.css?url";
@@ -30,9 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				name: "viewport",
 				content: "width=device-width, initial-scale=1",
 			},
-			{
-				title: "JogaJunto - Encontre outros jogadores facilmente",
-			},
+			...buildPageHead().meta,
 		],
 		links: [
 			{

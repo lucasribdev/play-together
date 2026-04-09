@@ -16,9 +16,17 @@ import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInfiniteScrollTrigger } from "@/hooks/use-infinite-scroll-trigger";
 import { getGames, getListings } from "@/lib/api";
+import { buildPageHead } from "@/lib/metadata";
 import type { Game, ListingSortBy, ListingType } from "@/types";
 
-export const Route = createFileRoute("/")({ component: App });
+export const Route = createFileRoute("/")({
+	head: () =>
+		buildPageHead({
+			path: "/",
+			title: "JogaJunto - Encontre outros jogadores facilmente",
+		}),
+	component: App,
+});
 
 const pageSize = 12;
 const homeGameSkeletonIds = [

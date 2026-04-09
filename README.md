@@ -16,8 +16,9 @@ npm run dev
 Create a `.env` file at the project root with the following values:
 
 ```bash
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_URL=your-supabase-url
+VITE_SUPABASE_KEY=your-supabase-anon-key
+VITE_SITE_URL=https://seu-dominio.com
 ```
 
 # Database Migrations (Supabase)

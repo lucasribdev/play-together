@@ -7,13 +7,32 @@ import GameArtwork from "@/components/GameArtwork";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGameBySlug, getListingsByGameId } from "@/lib/api";
+import { buildPageHead, truncateDescription } from "@/lib/metadata";
+import { getGamePageData } from "@/lib/page-data";
 import { cn } from "@/lib/utils";
 import type { ListingType } from "@/types";
 
 export const Route = createFileRoute("/games/$slug")({
 	loader: async ({ params }) => {
-		return { slug: params?.slug };
+		const slug = params?.slug;
+		return {
+			slug,
+			initialGame: await getGamePageData({ data: slug }),
+		};
 	},
+	head: ({ loaderData }) =>
+		buildPageHead({
+			path: `/games/${loaderData.slug}`,
+			title: loaderData.initialGame
+				? `${loaderData.initialGame.name} | JogaJunto`
+				: "Jogo | JogaJunto",
+			description: loaderData.initialGame
+				? truncateDescription(
+						`Encontre servidores, comunidades e grupos ativos de ${loaderData.initialGame.name} no JogaJunto.`,
+					)
+				: "Encontre comunidades e anúncios para este jogo no JogaJunto.",
+			image: loaderData.initialGame?.coverUrl || undefined,
+		}),
 	component: GameDetails,
 });
 const gameDetailsListingSkeletonIds = [
@@ -90,11 +109,12 @@ function GameDetailsSkeleton() {
 function GameDetails() {
 	const [activeTab, setActiveTab] = useState<ListingType>("SERVER");
 
-	const { slug } = Route.useLoaderData();
+	const { slug, initialGame } = Route.useLoaderData();
 
 	const { data: game, isLoading: isGameLoading } = useQuery({
 		queryKey: ["game", slug],
 		queryFn: ({ signal }) => getGameBySlug(slug, signal),
+		initialData: initialGame,
 	});
 
 	const { data: listingsData, isLoading: isListingsLoading } = useQuery({
