@@ -504,8 +504,7 @@ function RouteComponent() {
 										name="ip"
 										validators={{
 											onChange: ({ value }) => {
-												if (!value.trim()) return "IP é obrigatório";
-												if (!isValidServerAddress(value.trim()))
+												if (value.trim() && !isValidServerAddress(value.trim()))
 													return "Use um IP/host válido (ex: 192.168.0.10:2456)";
 												return undefined;
 											},
