@@ -49,7 +49,7 @@ const variantStyles: Record<
 };
 
 export function hasCoverUrl(game: Pick<Game, "coverUrl">) {
-	return game.coverUrl === "";
+	return !game.coverUrl;
 }
 
 export function getGameInitials(name: string) {
@@ -68,6 +68,7 @@ export default function GameArtwork({
 	className,
 	overlayClassName,
 }: GameArtworkProps) {
+	console.log("GameArtwork rendered for:", game);
 	if (!hasCoverUrl(game)) {
 		return (
 			<img
