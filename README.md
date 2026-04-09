@@ -1,4 +1,6 @@
-Welcome to your new TanStack Start app!
+# JogaJunto
+
+Plataforma para encontrar comunidades e pessoas para jogar.
 
 # Getting Started
 
@@ -36,8 +38,8 @@ Notes:
 
 Seed data:
 
-  - Creates local sample users, profiles, games, listings and likes.
-  - Gives enough data to test list/detail pages and like counts locally.
+- Creates local sample users, profiles, games, listings and likes.
+- Gives enough data to test list/detail pages and like counts locally.
 - Apply migrations and seed together with:
 
 ```bash

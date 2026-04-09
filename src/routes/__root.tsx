@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "GameBond - Encontre outros jogadores facilmente",
+				title: "JogaJunto - Encontre outros jogadores facilmente",
 			},
 		],
 		links: [
@@ -66,11 +66,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 											<Gamepad2 className="text-black w-4 h-4" />
 										</div>
 										<span className="text-lg font-bold tracking-tighter">
-											GameBond
+											JogaJunto
 										</span>
 									</div>
 									<p className="text-gray-500 text-sm">
-										&copy; 2026 GameBond. Feito para jogadores, por jogadores.
+										&copy; 2026 JogaJunto. Feito para jogadores, por jogadores.
 									</p>
 								</div>
 							</footer>
