@@ -12,6 +12,7 @@ import {
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import GameArtwork, { hasCoverUrl } from "@/components/GameArtwork";
+import ListingTypeBadge from "@/components/ListingTypeBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -24,7 +25,7 @@ import { getListingPageData } from "@/lib/page-data";
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/types";
 import { normalizeDiscordInvite } from "@/utils/discord";
-import { getTypeText } from "@/utils/typeText";
+import { getTypeStyles, getTypeText } from "@/utils/listing-type";
 
 export const Route = createFileRoute("/listings/$slug")({
 	loader: async ({ params }) => {
@@ -295,9 +296,7 @@ function ListingDetails() {
 						>
 							<div className="space-y-6">
 								<div className="flex items-center gap-4">
-									<span className="px-3 py-1 rounded-full text-[10px] font-black border border-brand-primary/30 bg-brand-primary/10 text-brand-primary uppercase tracking-[0.2em]">
-										{getTypeText(listing.type)}
-									</span>
+									<ListingTypeBadge type={listing.type} />
 									<div className="h-1 w-1 rounded-full bg-gray-600" />
 									<span className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">
 										Publicado em{" "}

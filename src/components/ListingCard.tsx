@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { toggleListingLike } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { Listing, ListingType } from "@/types";
-import { getTypeText } from "@/utils/typeText";
+import type { Listing } from "@/types";
+import { getTypeStyles, getTypeText } from "@/utils/listing-type";
+import ListingTypeBadge from "./ListingTypeBadge";
 
 export default function ListingCard({ listing }: { listing: Listing }) {
 	const navigate = useNavigate();
@@ -57,17 +58,6 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 	const canLike =
 		Boolean(session) && !isSessionLoading && !likeMutation.isPending;
 
-	const getTypeStyles = (type: ListingType) => {
-		switch (type) {
-			case "LFG":
-				return "bg-purple-500/10 text-purple-400 border-purple-500/20";
-			case "SERVER":
-				return "bg-blue-500/10 text-blue-400 border-blue-500/20";
-			case "COMMUNITY":
-				return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-		}
-	};
-
 	const handleLike = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (isSessionLoading || !session || likeMutation.isPending) return;
@@ -91,14 +81,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 			}
 		>
 			<div className="flex justify-between items-start">
-				<div
-					className={cn(
-						"px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider",
-						getTypeStyles(listing.type),
-					)}
-				>
-					{getTypeText(listing.type)}
-				</div>
+				<ListingTypeBadge type={listing.type} />
 				<button
 					type="button"
 					onClick={handleLike}
