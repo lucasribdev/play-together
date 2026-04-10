@@ -20,19 +20,29 @@ export const Route = createFileRoute("/games/$slug")({
 			initialGame: await getGamePageData({ data: slug }),
 		};
 	},
-	head: ({ loaderData }) =>
-		buildPageHead({
+	head: ({ loaderData }) => {
+		if (!loaderData) {
+			return buildPageHead({
+				path: "/games",
+				title: "Jogo | Templo",
+				description:
+					"Encontre comunidades e anúncios para este jogo no Templo.",
+			});
+		}
+
+		return buildPageHead({
 			path: `/games/${loaderData.slug}`,
 			title: loaderData.initialGame
-				? `${loaderData.initialGame.name} | JogaJunto`
-				: "Jogo | JogaJunto",
+				? `${loaderData.initialGame.name} | Templo`
+				: "Jogo | Templo",
 			description: loaderData.initialGame
 				? truncateDescription(
-						`Encontre servidores, comunidades e grupos ativos de ${loaderData.initialGame.name} no JogaJunto.`,
+						`Encontre servidores, comunidades e grupos ativos de ${loaderData.initialGame.name} no Templo.`,
 					)
-				: "Encontre comunidades e anúncios para este jogo no JogaJunto.",
+				: "Encontre comunidades e anúncios para este jogo no Templo.",
 			image: loaderData.initialGame?.coverUrl || undefined,
-		}),
+		});
+	},
 	component: GameDetails,
 });
 const gameDetailsListingSkeletonIds = [

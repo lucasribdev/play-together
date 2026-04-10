@@ -1,4 +1,4 @@
-# JogaJunto
+# Templo
 
 Plataforma para encontrar comunidades e pessoas para jogar.
 

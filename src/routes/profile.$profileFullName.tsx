@@ -20,20 +20,30 @@ export const Route = createFileRoute("/profile/$profileFullName")({
 			initialProfile: await getProfilePageData({ data: profileFullName }),
 		};
 	},
-	head: ({ loaderData }) =>
-		buildPageHead({
+	head: ({ loaderData }) => {
+		if (!loaderData) {
+			return buildPageHead({
+				path: "/profile",
+				title: "Perfil | Templo",
+				description: "Veja este perfil no Templo.",
+				type: "profile",
+			});
+		}
+
+		return buildPageHead({
 			path: `/profile/${loaderData.profileFullName}`,
 			title: loaderData.initialProfile
-				? `${loaderData.initialProfile.fullName} | JogaJunto`
-				: "Perfil | JogaJunto",
+				? `${loaderData.initialProfile.fullName} | Templo`
+				: "Perfil | Templo",
 			description: loaderData.initialProfile
 				? truncateDescription(
-						`${loaderData.initialProfile.fullName} está no JogaJunto. Veja anúncios publicados, curtidas e jogos em comum.`,
+						`${loaderData.initialProfile.fullName} está no Templo. Veja anúncios publicados, curtidas e jogos em comum.`,
 					)
-				: "Veja este perfil no JogaJunto.",
+				: "Veja este perfil no Templo.",
 			image: loaderData.initialProfile?.avatarUrl || undefined,
 			type: "profile",
-		}),
+		});
+	},
 	component: Profile,
 });
 

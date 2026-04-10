@@ -45,7 +45,7 @@ export default function Header() {
 							<Gamepad2 className="text-black w-5 h-5" />
 						</div>
 						<span className="text-xl font-bold tracking-tighter bg-gradient-to-r from-brand-primary to-brand-secondary bg-clip-text text-transparent">
-							JogaJunto
+							Templo
 						</span>
 					</Link>
 

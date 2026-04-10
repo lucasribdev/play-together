@@ -11,7 +11,7 @@ export const Route = createFileRoute("/games/")({
 	head: () =>
 		buildPageHead({
 			path: "/games",
-			title: "Explorar Jogos | JogaJunto",
+			title: "Explorar Jogos | Templo",
 			description:
 				"Explore jogos e encontre comunidades, servidores e grupos ativos para jogar junto.",
 		}),

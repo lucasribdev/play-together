@@ -1,5 +1,5 @@
-const APP_NAME = "JogaJunto";
-const DEFAULT_TITLE = "JogaJunto - Encontre outros jogadores facilmente";
+const APP_NAME = "Templo";
+const DEFAULT_TITLE = "Templo - Encontre outros jogadores facilmente";
 const DEFAULT_DESCRIPTION =
 	"Encontre servidores, comunidades e grupos para os seus jogos favoritos de PC. Tudo em um só lugar.";
 const DEFAULT_IMAGE_PATH = "/logo512.png";

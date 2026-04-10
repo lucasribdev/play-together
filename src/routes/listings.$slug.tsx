@@ -34,20 +34,29 @@ export const Route = createFileRoute("/listings/$slug")({
 			initialListing: await getListingPageData({ data: slug }),
 		};
 	},
-	head: ({ loaderData }) =>
-		buildPageHead({
+	head: ({ loaderData }) => {
+		if (!loaderData) {
+			return buildPageHead({
+				path: "/listings",
+				title: "Anúncio | Templo",
+				description: "Veja os detalhes deste anúncio no Templo.",
+			});
+		}
+
+		return buildPageHead({
 			path: `/listings/${loaderData.slug}`,
 			title: loaderData.initialListing
-				? `${loaderData.initialListing.title} | JogaJunto`
-				: "Anúncio | JogaJunto",
+				? `${loaderData.initialListing.title} | Templo`
+				: "Anúncio | Templo",
 			description: loaderData.initialListing
 				? truncateDescription(
 						loaderData.initialListing.description ||
 							`${getTypeText(loaderData.initialListing.type)} para ${loaderData.initialListing.game.name} criado por ${loaderData.initialListing.profile.fullName}.`,
 					)
-				: "Veja os detalhes deste anúncio no JogaJunto.",
+				: "Veja os detalhes deste anúncio no Templo.",
 			image: loaderData.initialListing?.game.coverUrl || undefined,
-		}),
+		});
+	},
 	component: ListingDetails,
 });
 

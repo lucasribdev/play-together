@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
 	head: () =>
 		buildPageHead({
 			path: "/",
-			title: "JogaJunto - Encontre outros jogadores facilmente",
+			title: "Templo - Encontre outros jogadores facilmente",
 		}),
 	component: App,
 });

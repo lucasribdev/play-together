@@ -65,11 +65,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 											<Gamepad2 className="text-black w-4 h-4" />
 										</div>
 										<span className="text-lg font-bold tracking-tighter">
-											JogaJunto
+											Templo
 										</span>
 									</div>
 									<p className="text-gray-500 text-sm">
-										&copy; 2026 JogaJunto. Feito para jogadores, por jogadores.
+										&copy; 2026 Templo. Feito para jogadores, por jogadores.
 									</p>
 								</div>
 							</footer>
