@@ -1,12 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Eye, Gamepad2, Heart } from "lucide-react";
+import { Clock, Eye, Gamepad2, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { toggleListingLike } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/types";
+import { formatPostedAt } from "@/utils/date";
 import ListingTypeBadge from "./ListingTypeBadge";
 
 export default function ListingCard({ listing }: { listing: Listing }) {
@@ -135,23 +136,22 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 					>
 						<img
 							src={listing?.profile.avatarUrl}
-							className="w-4 h-4 shrink-0 rounded-full object-cover border border-white/10"
+							className="w-5 h-5 shrink-0 rounded-full object-cover border border-white/10"
 							alt={listing?.profile.fullName}
 							referrerPolicy="no-referrer"
 						/>
-						<span className="text-[10px] text-gray-400 font-bold">
+						<span className="text-xs text-gray-500">
 							{listing.profile?.fullName}
 						</span>
 					</button>
-					<span className="text-[10px] text-gray-500 uppercase font-mono">
-						{new Date(listing.createdAt).toLocaleDateString("pt-BR")}
-					</span>
-					<div className="flex items-center gap-1 text-[10px] text-gray-500">
+				</div>
+				<div className="flex items-center gap-3">
+					<div className="flex items-center gap-1 text-xs text-gray-500">
 						<Eye className="w-3 h-3" /> {listing.views}
 					</div>
-				</div>
-				<div className="flex items-center gap-1 text-brand-primary text-xs font-bold">
-					Ver detalhes <ChevronRight className="w-4 h-4" />
+					<div className="flex items-center gap-1 text-xs text-gray-500">
+						<Clock className="w-3 h-3" /> {formatPostedAt(listing.createdAt)}
+					</div>
 				</div>
 			</div>
 		</motion.div>

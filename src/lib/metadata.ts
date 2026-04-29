@@ -2,11 +2,14 @@ const APP_NAME = "Templo";
 const DEFAULT_TITLE = "Templo - Encontre outros jogadores facilmente";
 const DEFAULT_DESCRIPTION =
 	"Descubra servidores, clãs, guildas e comunidades para jogar. Conecte-se com jogadores que compartilham sua paixão.";
-const DEFAULT_IMAGE_PATH = "/logo512.png";
+const DEFAULT_IMAGE_PATH = "/logo192.png";
+const DEFAULT_IMAGE_SIZE = 192;
 
 type BuildMetadataInput = {
 	description?: string;
 	image?: string;
+	imageHeight?: number;
+	imageWidth?: number;
 	path?: string;
 	title?: string;
 	type?: "profile" | "website";
@@ -41,12 +44,20 @@ function toAbsoluteUrl(value?: string) {
 export function buildPageHead({
 	description = DEFAULT_DESCRIPTION,
 	image = DEFAULT_IMAGE_PATH,
+	imageHeight,
+	imageWidth,
 	path = "/",
 	title = DEFAULT_TITLE,
 	type = "website",
 }: BuildMetadataInput = {}) {
 	const absoluteUrl = toAbsoluteUrl(path);
 	const absoluteImage = toAbsoluteUrl(image) ?? absoluteUrl;
+	const resolvedImageWidth =
+		imageWidth ??
+		(image === DEFAULT_IMAGE_PATH ? DEFAULT_IMAGE_SIZE : undefined);
+	const resolvedImageHeight =
+		imageHeight ??
+		(image === DEFAULT_IMAGE_PATH ? DEFAULT_IMAGE_SIZE : undefined);
 
 	return {
 		meta: [
@@ -61,7 +72,23 @@ export function buildPageHead({
 			...(absoluteImage
 				? [{ property: "og:image", content: absoluteImage }]
 				: []),
-			{ name: "twitter:card", content: "summary_large_image" },
+			...(absoluteImage && resolvedImageWidth
+				? [
+						{
+							property: "og:image:width",
+							content: String(resolvedImageWidth),
+						},
+					]
+				: []),
+			...(absoluteImage && resolvedImageHeight
+				? [
+						{
+							property: "og:image:height",
+							content: String(resolvedImageHeight),
+						},
+					]
+				: []),
+			{ name: "twitter:card", content: "summary" },
 			{ name: "twitter:title", content: title },
 			{ name: "twitter:description", content: description },
 			...(absoluteImage

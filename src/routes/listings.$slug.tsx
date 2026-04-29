@@ -16,6 +16,7 @@ import { buildPageHead, truncateDescription } from "@/lib/metadata";
 import { getListingPageData } from "@/lib/page-data";
 import { cn } from "@/lib/utils";
 import type { Listing } from "@/types";
+import { formatPostedAt } from "@/utils/date";
 import { normalizeDiscordInvite } from "@/utils/discord";
 import { getTypeText } from "@/utils/listing-type";
 import { memberSince } from "@/utils/profile";
@@ -288,8 +289,8 @@ function ListingDetails() {
 										{listing.game.name}
 									</Link>
 									<div className="h-1 w-1 rounded-full bg-gray-600" />
-									<span className="text-gray-500 uppercase text-xs">
-										{new Date(listing.createdAt).toLocaleDateString("pt-BR")}
+									<span className="text-gray-500 text-xs">
+										{formatPostedAt(listing.createdAt)}
 									</span>
 								</div>
 
