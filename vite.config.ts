@@ -28,5 +28,44 @@ export default defineConfig(({ command }) => {
 				},
 			}),
 		],
+		build: {
+			rollupOptions: {
+				output: {
+					manualChunks(id) {
+						if (!id.includes("node_modules")) {
+							return;
+						}
+
+						if (
+							id.includes("/react/") ||
+							id.includes("/react-dom/") ||
+							id.includes("/scheduler/")
+						) {
+							return "vendor-react";
+						}
+
+						if (id.includes("/@tanstack/")) {
+							return "vendor-tanstack";
+						}
+
+						if (id.includes("/@supabase/")) {
+							return "vendor-supabase";
+						}
+
+						if (id.includes("/motion/")) {
+							return "vendor-motion";
+						}
+
+						if (
+							id.includes("/lucide-react/") ||
+							id.includes("/radix-ui/") ||
+							id.includes("/sonner/")
+						) {
+							return "vendor-ui";
+						}
+					},
+				},
+			},
+		},
 	};
 });
