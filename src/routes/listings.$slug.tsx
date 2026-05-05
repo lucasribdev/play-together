@@ -356,7 +356,7 @@ function ListingDetails() {
 											href={discordInviteUrl}
 											target="_blank"
 											rel="noopener noreferrer"
-											className="flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-sm btn-primary transition-all shadow-lg shadow-brand-primary/20 group"
+											className="flex items-center justify-center gap-3 py-4 px-6 rounded-2xl font-bold text-sm btn-discord transition-all shadow-lg shadow-discord/20 group"
 										>
 											<ExternalLink className="w-5 h-5 group-hover:scale-110 transition-transform" />
 											Entrar no Discord
