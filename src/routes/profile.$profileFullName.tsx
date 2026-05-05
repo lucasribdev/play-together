@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Check, Copy, Heart, PlusCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInfiniteScrollTrigger } from "@/hooks/use-infinite-scroll-trigger";
@@ -130,6 +130,7 @@ function ProfileSkeleton() {
 
 function Profile() {
 	const [fullNameCopied, setFullNameCopied] = useState(false);
+	const fullNameCopiedTimeoutRef = useRef<number | null>(null);
 	const { profileFullName, initialProfile } = Route.useLoaderData();
 
 	const { data: profile, isLoading: isProfileLoading } = useQuery({
@@ -196,6 +197,15 @@ function Profile() {
 
 	const listings = listingsData?.pages.flat() ?? [];
 	const likedListings = likedListingsData?.pages.flat() ?? [];
+
+	useEffect(() => {
+		return () => {
+			if (fullNameCopiedTimeoutRef.current) {
+				window.clearTimeout(fullNameCopiedTimeoutRef.current);
+			}
+		};
+	}, []);
+
 	const setListingsLoadMoreNode = useInfiniteScrollTrigger<HTMLDivElement>({
 		hasNextPage: hasNextListingsPage,
 		isFetchingNextPage: isFetchingNextListingsPage,
@@ -225,9 +235,20 @@ function Profile() {
 	}
 
 	const handleCopyFullName = async () => {
-		await navigator.clipboard.writeText(profile.fullName);
-		setFullNameCopied(true);
-		setTimeout(() => setFullNameCopied(false), 2000);
+		if (fullNameCopiedTimeoutRef.current) {
+			window.clearTimeout(fullNameCopiedTimeoutRef.current);
+		}
+
+		try {
+			await navigator.clipboard.writeText(profile.fullName);
+			setFullNameCopied(true);
+			fullNameCopiedTimeoutRef.current = window.setTimeout(() => {
+				setFullNameCopied(false);
+				fullNameCopiedTimeoutRef.current = null;
+			}, 2000);
+		} catch {
+			setFullNameCopied(false);
+		}
 	};
 
 	return (
