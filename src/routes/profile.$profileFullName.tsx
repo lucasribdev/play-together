@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, PlusCircle } from "lucide-react";
+import { Check, Copy, Heart, PlusCircle } from "lucide-react";
+import { useState } from "react";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useInfiniteScrollTrigger } from "@/hooks/use-infinite-scroll-trigger";
@@ -128,6 +129,7 @@ function ProfileSkeleton() {
 }
 
 function Profile() {
+	const [fullNameCopied, setFullNameCopied] = useState(false);
 	const { profileFullName, initialProfile } = Route.useLoaderData();
 
 	const { data: profile, isLoading: isProfileLoading } = useQuery({
@@ -222,6 +224,12 @@ function Profile() {
 		);
 	}
 
+	const handleCopyFullName = async () => {
+		await navigator.clipboard.writeText(profile.fullName);
+		setFullNameCopied(true);
+		setTimeout(() => setFullNameCopied(false), 2000);
+	};
+
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
 			<div className="flex flex-col md:flex-row items-center gap-8 glass-panel p-8">
@@ -238,9 +246,24 @@ function Profile() {
 					</div>
 				)}
 				<div className="text-center md:text-left space-y-2">
-					<h1 className="text-4xl font-bold tracking-tight">
-						{profile.fullName}
-					</h1>
+					<div className="flex items-center justify-center gap-2 md:justify-start">
+						<h1 className="text-4xl font-bold tracking-tight">
+							{profile.fullName}
+						</h1>
+						<button
+							type="button"
+							onClick={handleCopyFullName}
+							className="inline-flex size-8 items-center justify-center rounded-md text-gray-400 hover:border hover:border-brand-primary/50 hover:text-brand-primary"
+							aria-label={`Copiar ${profile.fullName}`}
+							title={fullNameCopied ? "Copiado" : "Copiar nome"}
+						>
+							{fullNameCopied ? (
+								<Check className="size-4 text-emerald-400" />
+							) : (
+								<Copy className="size-4" />
+							)}
+						</button>
+					</div>
 					{memberSince(profile) && (
 						<p className="text-gray-500">Membro desde {memberSince(profile)}</p>
 					)}
