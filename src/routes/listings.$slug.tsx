@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Check, Copy, ExternalLink, Eye, Heart } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GameArtwork from "@/components/GameArtwork";
 import ListingTypeBadge from "@/components/ListingTypeBadge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -119,6 +119,7 @@ function ListingDetailsSkeleton() {
 function ListingDetails() {
 	const [copied, setCopied] = useState(false);
 	const [viewsCount, setViewsCount] = useState<number | null>(null);
+	const copiedTimeoutRef = useRef<number | null>(null);
 
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
@@ -152,6 +153,14 @@ function ListingDetails() {
 			isMounted = false;
 		};
 	}, [listing?.slug, listing?.views]);
+
+	useEffect(() => {
+		return () => {
+			if (copiedTimeoutRef.current) {
+				window.clearTimeout(copiedTimeoutRef.current);
+			}
+		};
+	}, []);
 
 	const likeMutation = useMutation({
 		mutationFn: () => {
@@ -223,11 +232,22 @@ function ListingDetails() {
 	const canLike =
 		Boolean(session) && !isSessionLoading && !likeMutation.isPending;
 
-	const handleCopyIP = () => {
+	const handleCopyIP = async () => {
 		if ("ip" in listing && listing.ip) {
-			navigator.clipboard.writeText(listing.ip);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
+			if (copiedTimeoutRef.current) {
+				window.clearTimeout(copiedTimeoutRef.current);
+			}
+
+			try {
+				await navigator.clipboard.writeText(listing.ip);
+				setCopied(true);
+				copiedTimeoutRef.current = window.setTimeout(() => {
+					setCopied(false);
+					copiedTimeoutRef.current = null;
+				}, 2000);
+			} catch {
+				setCopied(false);
+			}
 		}
 	};
 
