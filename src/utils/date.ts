@@ -20,7 +20,7 @@ export function formatPostedAt(dateValue: string | Date) {
 	);
 
 	if (diffInSeconds < 60) {
-		return "postado agora";
+		return "criado agora";
 	}
 
 	const matchedUnit = relativeTimeUnits.find(
@@ -28,18 +28,18 @@ export function formatPostedAt(dateValue: string | Date) {
 	);
 
 	if (!matchedUnit) {
-		return "postado agora";
+		return "criado agora";
 	}
 
 	const value = Math.floor(diffInSeconds / matchedUnit.seconds);
 
 	if (matchedUnit.unit === "mes") {
-		return `postado há ${value} ${value === 1 ? "mês" : "meses"}`;
+		return `criado há ${value} ${value === 1 ? "mês" : "meses"}`;
 	}
 
 	if (matchedUnit.unit === "ano") {
-		return `postado há ${value} ${value === 1 ? "ano" : "anos"}`;
+		return `criado há ${value} ${value === 1 ? "ano" : "anos"}`;
 	}
 
-	return `postado há ${value}${matchedUnit.unit}`;
+	return `criado há ${value}${matchedUnit.unit}`;
 }

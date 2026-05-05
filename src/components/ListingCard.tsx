@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Clock, Eye, Gamepad2, Heart } from "lucide-react";
+import { Circle, Clock, Eye, Gamepad2, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
@@ -84,6 +84,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 				<ListingTypeBadge type={listing.type} />
 				<button
 					type="button"
+					title={`${likeState.likesCount} ${likeState.likesCount === 1 ? "curtida" : "curtidas"}`}
 					onClick={handleLike}
 					disabled={isSessionLoading || !session || likeMutation.isPending}
 					className={cn(
@@ -93,7 +94,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 							: canLike
 								? "text-gray-500 hover:text-red-400"
 								: "text-gray-500",
-						!canLike && "pointer-events-none opacity-70",
+						!canLike && "opacity-70",
 					)}
 				>
 					<span className="text-xs font-bold">{likeState.likesCount}</span>
@@ -136,7 +137,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 					>
 						<img
 							src={listing?.profile.avatarUrl}
-							className="w-5 h-5 shrink-0 rounded-full object-cover border border-white/10"
+							className="w-6 h-6 shrink-0 rounded-full object-cover border border-white/10"
 							alt={listing?.profile.fullName}
 							referrerPolicy="no-referrer"
 						/>
@@ -144,14 +145,24 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 							{listing.profile?.fullName}
 						</span>
 					</button>
-				</div>
-				<div className="flex items-center gap-3">
-					<div className="flex items-center gap-1 text-xs text-gray-500">
-						<Eye className="w-3 h-3" /> {listing.views}
-					</div>
 					<div className="flex items-center gap-1 text-xs text-gray-500">
 						<Clock className="w-3 h-3" /> {formatPostedAt(listing.createdAt)}
 					</div>
+				</div>
+				<div className="flex items-center gap-3">
+					<div
+						className="flex items-center gap-1 text-xs text-gray-500"
+						title={`${listing.views} ${listing.views === 1 ? "visualização" : "visualizações"}`}
+					>
+						<Eye className="w-3 h-3" /> {listing.views}
+					</div>
+					{/* <div
+						className="flex items-center gap-1 text-xs text-gray-500"
+						title={`${listing.views} online agora`}
+					>
+						<Circle className="w-3 h-3 fill-brand-primary text-brand-primary" />{" "}
+						{listing.views}
+					</div> */}
 				</div>
 			</div>
 		</motion.div>

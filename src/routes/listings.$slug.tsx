@@ -303,7 +303,9 @@ function ListingDetails() {
 										<Eye className="w-4 h-4" />
 										<span>
 											{displayedViewsCount}{" "}
-											{displayedViewsCount === 1 ? "view" : "views"}
+											{displayedViewsCount === 1
+												? "visualização"
+												: "visualizações"}
 										</span>
 									</div>
 
