@@ -8,6 +8,8 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Gamepad2 } from "lucide-react";
+import { Analytics, CookieConsentBanner } from "@/components/Analytics";
+import { AuthPromptProvider } from "@/components/AuthPromptModal";
 import BackToTop from "@/components/BackToTop";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
@@ -53,27 +55,48 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<body>
 				<TanStackQueryProvider>
 					<AuthProvider>
-						<div className="min-h-screen flex flex-col">
-							<Header />
-							<main className="flex-grow">{children}</main>
-							<BackToTop />
-							<Toaster />
-							<footer className="border-t border-border-dark py-12 mt-20">
-								<div className="max-w-7xl mx-auto px-4 text-center space-y-4">
-									<div className="flex items-center justify-center gap-2">
-										<div className="w-6 h-6 bg-brand-primary rounded flex items-center justify-center">
-											<Gamepad2 className="text-black w-4 h-4" />
+						<AuthPromptProvider>
+							<div className="min-h-screen flex flex-col">
+								<Analytics />
+								<Header />
+								<main className="flex-grow">{children}</main>
+								<BackToTop />
+								<Toaster />
+								<CookieConsentBanner />
+								<footer className="border-t border-border-dark py-12 mt-20">
+									<div className="max-w-7xl mx-auto px-4 text-center space-y-4">
+										<div className="flex items-center justify-center gap-2">
+											<div className="w-6 h-6 bg-brand-primary rounded flex items-center justify-center">
+												<Gamepad2 className="text-black w-4 h-4" />
+											</div>
+											<span className="text-lg font-bold tracking-tighter">
+												Templo
+											</span>
 										</div>
-										<span className="text-lg font-bold tracking-tighter">
-											Templo
-										</span>
+										<p className="text-gray-500 text-sm">
+											&copy; 2026 Templo. Feito para jogadores, por jogadores.
+										</p>
+										<nav
+											aria-label="Links legais"
+											className="flex items-center justify-center gap-4 text-sm"
+										>
+											<Link
+												to="/privacidade"
+												className="text-gray-500 hover:text-brand-primary transition-colors"
+											>
+												Política de Privacidade
+											</Link>
+											<Link
+												to="/termos-de-uso"
+												className="text-gray-500 hover:text-brand-primary transition-colors"
+											>
+												Termos de Uso
+											</Link>
+										</nav>
 									</div>
-									<p className="text-gray-500 text-sm">
-										&copy; 2026 Templo. Feito para jogadores, por jogadores.
-									</p>
-								</div>
-							</footer>
-						</div>
+								</footer>
+							</div>
+						</AuthPromptProvider>
 					</AuthProvider>
 					<TanStackDevtools
 						config={{

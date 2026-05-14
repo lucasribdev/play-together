@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { Circle, Clock, Eye, Gamepad2, Heart } from "lucide-react";
+import { Clock, Eye, Gamepad2, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useAuthPrompt } from "@/components/AuthPromptModal";
+import UserAvatar from "@/components/UserAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { toggleListingLike } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -14,6 +16,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { session, isSessionLoading } = useAuth();
+	const { openAuthPrompt } = useAuthPrompt();
 	const [likeState, setLikeState] = useState({
 		likesCount: listing.likesCount,
 		userLiked: listing.userLiked,
@@ -55,12 +58,18 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 			]);
 		},
 	});
-	const canLike =
-		Boolean(session) && !isSessionLoading && !likeMutation.isPending;
 
 	const handleLike = (e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (isSessionLoading || !session || likeMutation.isPending) return;
+		if (isSessionLoading || likeMutation.isPending) return;
+		if (!session) {
+			openAuthPrompt({
+				title: "Curtir anúncio",
+				description: "Entre ou cadastre-se com Discord para curtir anúncios.",
+				redirectTo: `/listings/${listing.slug}`,
+			});
+			return;
+		}
 		likeMutation.mutate();
 	};
 
@@ -86,15 +95,12 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 					type="button"
 					title={`${likeState.likesCount} ${likeState.likesCount === 1 ? "curtida" : "curtidas"}`}
 					onClick={handleLike}
-					disabled={isSessionLoading || !session || likeMutation.isPending}
+					disabled={isSessionLoading || likeMutation.isPending}
 					className={cn(
 						"flex items-center gap-1 transition-all",
 						likeState.userLiked
 							? "text-red-500"
-							: canLike
-								? "text-gray-500 hover:text-red-400"
-								: "text-gray-500",
-						!canLike && "opacity-70",
+							: "text-gray-500 hover:text-red-400",
 					)}
 				>
 					<span className="text-xs font-bold">{likeState.likesCount}</span>
@@ -135,11 +141,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 						onClick={handleProfileClick}
 						className="flex items-center gap-1.5 rounded-sm transition-colors hover:text-brand-primary"
 					>
-						<img
-							src={listing?.profile.avatarUrl}
+						<UserAvatar
+							avatarUrl={listing.profile.avatarUrl}
 							className="w-6 h-6 shrink-0 rounded-full object-cover border border-white/10"
-							alt={listing?.profile.fullName}
-							referrerPolicy="no-referrer"
+							name={listing.profile.fullName}
 						/>
 						<span className="text-xs text-gray-500">
 							{listing.profile?.fullName}

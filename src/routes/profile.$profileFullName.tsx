@@ -1,9 +1,11 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Check, Copy, Heart, PlusCircle } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Check, Copy, Heart, LogOut, PlusCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import ListingCard from "@/components/ListingCard";
+import UserAvatar from "@/components/UserAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 import { useInfiniteScrollTrigger } from "@/hooks/use-infinite-scroll-trigger";
 import {
 	getLikedListingsByUserId,
@@ -130,8 +132,11 @@ function ProfileSkeleton() {
 
 function Profile() {
 	const [fullNameCopied, setFullNameCopied] = useState(false);
+	const [isSigningOut, setIsSigningOut] = useState(false);
 	const fullNameCopiedTimeoutRef = useRef<number | null>(null);
 	const { profileFullName, initialProfile } = Route.useLoaderData();
+	const navigate = useNavigate();
+	const { session, signOut } = useAuth();
 
 	const { data: profile, isLoading: isProfileLoading } = useQuery({
 		queryKey: ["profile", profileFullName],
@@ -197,6 +202,9 @@ function Profile() {
 
 	const listings = listingsData?.pages.flat() ?? [];
 	const likedListings = likedListingsData?.pages.flat() ?? [];
+	const isOwnProfile = Boolean(
+		session?.user?.id && profile?.id === session.user.id,
+	);
 
 	useEffect(() => {
 		return () => {
@@ -251,21 +259,28 @@ function Profile() {
 		}
 	};
 
+	const handleSignOut = async () => {
+		if (isSigningOut) return;
+
+		setIsSigningOut(true);
+		const { error } = await signOut();
+
+		if (!error) {
+			navigate({ to: "/" });
+			return;
+		}
+
+		setIsSigningOut(false);
+	};
+
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-12 space-y-12">
 			<div className="flex flex-col md:flex-row items-center gap-8 glass-panel p-8">
-				{profile.avatarUrl ? (
-					<img
-						src={profile.avatarUrl}
-						alt={profile.fullName}
-						className="w-32 h-32 shrink-0 rounded-3xl object-cover border-4 border-brand-primary/20"
-						referrerPolicy="no-referrer"
-					/>
-				) : (
-					<div className="w-32 h-32 rounded-3xl border-4 border-brand-primary/20 bg-white/5 flex items-center justify-center text-3xl font-bold">
-						{profile.fullName.slice(0, 1).toUpperCase()}
-					</div>
-				)}
+				<UserAvatar
+					avatarUrl={profile.avatarUrl}
+					className="w-32 h-32 shrink-0 rounded-3xl object-cover border-4 border-brand-primary/20 text-3xl"
+					name={profile.fullName}
+				/>
 				<div className="text-center md:text-left space-y-2">
 					<div className="flex items-center justify-center gap-2 md:justify-start">
 						<h1 className="text-4xl font-bold tracking-tight">
@@ -309,6 +324,17 @@ function Profile() {
 							</p>
 						</div>
 					</div>
+					{isOwnProfile && (
+						<button
+							type="button"
+							onClick={handleSignOut}
+							disabled={isSigningOut}
+							className="mt-4 inline-flex items-center justify-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-bold text-red-400 transition-colors hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+						>
+							<LogOut className="size-4" />
+							{isSigningOut ? "Saindo..." : "Sair"}
+						</button>
+					)}
 				</div>
 			</div>
 

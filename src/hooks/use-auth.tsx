@@ -21,6 +21,33 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function getProfileUpdatesFromSession(session: Session) {
+	const metadata = session.user.user_metadata;
+	const avatarUrl =
+		typeof metadata.avatar_url === "string"
+			? metadata.avatar_url
+			: typeof metadata.picture === "string"
+				? metadata.picture
+				: undefined;
+	const discordId =
+		typeof metadata.provider_id === "string"
+			? metadata.provider_id
+			: typeof metadata.sub === "string"
+				? metadata.sub
+				: undefined;
+
+	return {
+		avatar_url: avatarUrl,
+		discord_id: discordId,
+	};
+}
+
+async function syncProfileFromSession(session: Session) {
+	const updates = getProfileUpdatesFromSession(session);
+
+	await supabase.from("profiles").update(updates).eq("id", session.user.id);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [isSessionLoading, setIsSessionLoading] = useState(true);
@@ -33,6 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (!isMounted) return;
 			setSession(data.session ?? null);
 			setIsSessionLoading(false);
+			if (data.session) {
+				void syncProfileFromSession(data.session);
+			}
 		};
 
 		loadSession();
@@ -41,6 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (!isMounted) return;
 			setSession(next);
 			setIsSessionLoading(false);
+			if (next) {
+				void syncProfileFromSession(next);
+			}
 		});
 
 		return () => {

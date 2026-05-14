@@ -3,8 +3,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Check, Copy, ExternalLink, Eye, Heart } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { useAuthPrompt } from "@/components/AuthPromptModal";
 import GameArtwork from "@/components/GameArtwork";
 import ListingTypeBadge from "@/components/ListingTypeBadge";
+import UserAvatar from "@/components/UserAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -124,6 +126,7 @@ function ListingDetails() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { session, isSessionLoading } = useAuth();
+	const { openAuthPrompt } = useAuthPrompt();
 
 	const { slug, initialListing } = Route.useLoaderData();
 
@@ -229,8 +232,6 @@ function ListingDetails() {
 
 	const discordInviteUrl = normalizeDiscordInvite(listing.discordInvite ?? "");
 	const displayedViewsCount = viewsCount ?? listing.views;
-	const canLike =
-		Boolean(session) && !isSessionLoading && !likeMutation.isPending;
 
 	const handleCopyIP = async () => {
 		if ("ip" in listing && listing.ip) {
@@ -254,7 +255,15 @@ function ListingDetails() {
 	const handleLike = (e: React.MouseEvent) => {
 		e.stopPropagation();
 		if (!listing.slug) return;
-		if (isSessionLoading || !session || likeMutation.isPending) return;
+		if (isSessionLoading || likeMutation.isPending) return;
+		if (!session) {
+			openAuthPrompt({
+				title: "Curtir anúncio",
+				description: "Entre ou cadastre-se com Discord para curtir anúncios.",
+				redirectTo: `/listings/${listing.slug}`,
+			});
+			return;
+		}
 		likeMutation.mutate();
 	};
 
@@ -332,14 +341,12 @@ function ListingDetails() {
 									<button
 										type="button"
 										onClick={handleLike}
-										disabled={!canLike}
+										disabled={isSessionLoading || likeMutation.isPending}
 										className={cn(
 											"flex items-center justify-center gap-2 py-4 px-4 rounded-2xl font-bold text-xs transition-all border",
 											listing.userLiked
 												? "text-red-500 border-0"
-												: canLike
-													? "text-gray-400 border-0 hover:text-red-500"
-													: "text-gray-400 border-0",
+												: "text-gray-400 border-0 hover:text-red-500",
 										)}
 									>
 										<Heart
@@ -405,11 +412,10 @@ function ListingDetails() {
 									className="flex items-center gap-4 pt-6 border-t border-white/5 transition-colors hover:text-brand-primary"
 								>
 									<div className="relative">
-										<img
-											src={listing.profile.avatarUrl}
-											alt={`${listing.profile.fullName} avatar`}
+										<UserAvatar
+											avatarUrl={listing.profile.avatarUrl}
 											className="w-14 h-14 rounded-full object-cover"
-											referrerPolicy="no-referrer"
+											name={listing.profile.fullName}
 										/>
 									</div>
 									<div>

@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermosDeUsoRouteImport } from './routes/termos-de-uso'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as CreateListingRouteImport } from './routes/create-listing'
 import { Route as IndexRouteImport } from './routes/index'
@@ -25,6 +27,16 @@ import { Route as ApiUsersIdLikedListingsRouteImport } from './routes/api/users.
 import { Route as ApiListingsSlugViewsRouteImport } from './routes/api/listings.$slug.views'
 import { Route as ApiListingsSlugLikesRouteImport } from './routes/api/listings.$slug.likes'
 
+const TermosDeUsoRoute = TermosDeUsoRouteImport.update({
+  id: '/termos-de-uso',
+  path: '/termos-de-uso',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesRoute = GamesRouteImport.update({
   id: '/games',
   path: '/games',
@@ -106,6 +118,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/create-listing': typeof CreateListingRoute
   '/games': typeof GamesRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/games/$slug': typeof GamesSlugRoute
@@ -122,6 +136,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/create-listing': typeof CreateListingRoute
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/games/$slug': typeof GamesSlugRoute
@@ -140,6 +156,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/create-listing': typeof CreateListingRoute
   '/games': typeof GamesRouteWithChildren
+  '/privacidade': typeof PrivacidadeRoute
+  '/termos-de-uso': typeof TermosDeUsoRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/games/$slug': typeof GamesSlugRoute
@@ -159,6 +177,8 @@ export interface FileRouteTypes {
     | '/'
     | '/create-listing'
     | '/games'
+    | '/privacidade'
+    | '/termos-de-uso'
     | '/api/games'
     | '/api/listings'
     | '/games/$slug'
@@ -175,6 +195,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/create-listing'
+    | '/privacidade'
+    | '/termos-de-uso'
     | '/api/games'
     | '/api/listings'
     | '/games/$slug'
@@ -192,6 +214,8 @@ export interface FileRouteTypes {
     | '/'
     | '/create-listing'
     | '/games'
+    | '/privacidade'
+    | '/termos-de-uso'
     | '/api/games'
     | '/api/listings'
     | '/games/$slug'
@@ -210,6 +234,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CreateListingRoute: typeof CreateListingRoute
   GamesRoute: typeof GamesRouteWithChildren
+  PrivacidadeRoute: typeof PrivacidadeRoute
+  TermosDeUsoRoute: typeof TermosDeUsoRoute
   ApiGamesRoute: typeof ApiGamesRouteWithChildren
   ApiListingsRoute: typeof ApiListingsRouteWithChildren
   ListingsSlugRoute: typeof ListingsSlugRoute
@@ -220,6 +246,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/termos-de-uso': {
+      id: '/termos-de-uso'
+      path: '/termos-de-uso'
+      fullPath: '/termos-de-uso'
+      preLoaderRoute: typeof TermosDeUsoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games': {
       id: '/games'
       path: '/games'
@@ -382,6 +422,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CreateListingRoute: CreateListingRoute,
   GamesRoute: GamesRouteWithChildren,
+  PrivacidadeRoute: PrivacidadeRoute,
+  TermosDeUsoRoute: TermosDeUsoRoute,
   ApiGamesRoute: ApiGamesRouteWithChildren,
   ApiListingsRoute: ApiListingsRouteWithChildren,
   ListingsSlugRoute: ListingsSlugRoute,

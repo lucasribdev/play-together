@@ -3,9 +3,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, Globe, PlusCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { useAuthPrompt } from "@/components/AuthPromptModal";
 import GameArtwork from "@/components/GameArtwork";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/use-auth";
 import { getGameBySlug, getListingsByGameId } from "@/lib/api";
 import { buildPageHead, truncateDescription } from "@/lib/metadata";
 import { getGamePageData } from "@/lib/page-data";
@@ -130,6 +132,8 @@ function GameDetailsSkeleton() {
 
 function GameDetails() {
 	const [activeTab, setActiveTab] = useState<ListingType>("SERVER");
+	const { session, isSessionLoading } = useAuth();
+	const { openAuthPrompt } = useAuthPrompt();
 
 	const { slug, initialGame } = Route.useLoaderData();
 
@@ -153,6 +157,17 @@ function GameDetails() {
 		return <div className="p-20 text-center">Jogo não encontrado.</div>;
 
 	const listings = listingsData?.filter((l) => l.type === activeTab);
+
+	const handleCreateListing = () => {
+		if (isSessionLoading) return;
+		if (!session) {
+			openAuthPrompt({
+				title: "Criar anúncio",
+				description: "Você precisa estar autenticado para criar um anúncio.",
+				redirectTo: `/create-listing?game=${game.slug}`,
+			});
+		}
+	};
 
 	return (
 		<div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -196,13 +211,24 @@ function GameDetails() {
 								))}
 							</div>
 						</div>
-						<Link
-							to={`/create-listing`}
-							search={{ game: game.slug }}
-							className="btn-primary flex items-center gap-2"
-						>
-							<PlusCircle className="w-5 h-5" /> Criar anúncio
-						</Link>
+						{session ? (
+							<Link
+								to={`/create-listing`}
+								search={{ game: game.slug }}
+								className="btn-primary flex items-center gap-2"
+							>
+								<PlusCircle className="w-5 h-5" /> Criar Anúncio
+							</Link>
+						) : (
+							<button
+								type="button"
+								onClick={handleCreateListing}
+								disabled={isSessionLoading}
+								className="btn-primary flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
+							>
+								<PlusCircle className="w-5 h-5" /> Criar Anúncio
+							</button>
+						)}
 					</div>
 				</div>
 			</div>

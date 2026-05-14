@@ -9,6 +9,7 @@ import { MessageSquare, Search, Server, Users, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { type KeyboardEvent, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
+import { useAuthPrompt } from "@/components/AuthPromptModal";
 import GameArtwork from "@/components/GameArtwork";
 import TypeOption from "@/components/TypeOption";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,7 +81,8 @@ function RouteComponent() {
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const tagsInputId = useId();
 	const navigate = useNavigate();
-	const { isSessionLoading, session, signInWithDiscord } = useAuth();
+	const { isSessionLoading, session } = useAuth();
+	const { openAuthPrompt } = useAuthPrompt();
 	const { game: searchGame } = Route.useSearch();
 
 	useEffect(() => {
@@ -159,7 +161,11 @@ function RouteComponent() {
 			}
 
 			if (!session?.user?.id) {
-				alert("Faça login para publicar um anúncio.");
+				openAuthPrompt({
+					title: "Criar anúncio",
+					description: "Você precisa estar autenticado para criar um anúncio.",
+					redirectTo: "/create-listing",
+				});
 				return;
 			}
 
@@ -186,6 +192,16 @@ function RouteComponent() {
 		},
 	});
 
+	useEffect(() => {
+		if (isSessionLoading || session) return;
+
+		openAuthPrompt({
+			title: "Criar anúncio",
+			description: "Você precisa estar autenticado para criar um anúncio.",
+			redirectTo: "/create-listing",
+		});
+	}, [isSessionLoading, session, openAuthPrompt]);
+
 	if (isSessionLoading) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
@@ -199,19 +215,7 @@ function RouteComponent() {
 	if (!session) {
 		return (
 			<div className="max-w-3xl mx-auto px-4 py-12">
-				<div className="glass-panel p-10 text-center space-y-4">
-					<h1 className="text-3xl font-bold tracking-tight">Criar anúncio</h1>
-					<p className="text-gray-400">
-						Você precisa estar autenticado para criar um anúncio.
-					</p>
-					<button
-						type="button"
-						onClick={() => void signInWithDiscord("/create-listing")}
-						className="btn-primary"
-					>
-						Entrar com Discord
-					</button>
-				</div>
+				<div className="h-48" />
 			</div>
 		);
 	}
