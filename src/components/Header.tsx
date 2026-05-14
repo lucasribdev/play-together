@@ -1,21 +1,27 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Gamepad2, LogIn, PlusCircle, UserIcon } from "lucide-react";
+import { useState } from "react";
 import { useAuthPrompt } from "@/components/AuthPromptModal";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Header() {
-	const { isSessionLoading, session } = useAuth();
+	const [isAuthLoading, setIsAuthLoading] = useState(false);
+	const { isSessionLoading, session, signInWithDiscord } = useAuth();
 	const { openAuthPrompt } = useAuthPrompt();
 
 	const navigate = useNavigate();
 	const profileFullName = session?.user.user_metadata.full_name;
 
-	const handleDiscordLogin = () => {
-		openAuthPrompt({
-			title: "Entrar",
-			description: "Entre ou cadastre-se com Discord para usar o Templo.",
-			redirectTo: "/",
-		});
+	const handleDiscordLogin = async () => {
+		if (isAuthLoading) return;
+
+		setIsAuthLoading(true);
+		const { error } = await signInWithDiscord("/");
+
+		if (error) {
+			window.location.href = "?error=oauth_failed";
+			setIsAuthLoading(false);
+		}
 	};
 
 	const handleCreateListing = () => {
@@ -60,9 +66,11 @@ export default function Header() {
 								<button
 									type="button"
 									onClick={handleDiscordLogin}
-									className="text-sm font-medium hover:text-brand-primary transition-colors flex items-center gap-2"
+									disabled={isAuthLoading}
+									className="text-sm font-medium hover:text-brand-primary transition-colors flex items-center gap-2 disabled:cursor-not-allowed disabled:opacity-60"
 								>
-									<LogIn className="w-4 h-4" /> Entrar com Discord
+									<LogIn className="w-4 h-4" />
+									{isAuthLoading ? "Entrando..." : "Entrar com Discord"}
 								</button>
 							</>
 						) : (
