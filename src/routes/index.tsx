@@ -15,10 +15,12 @@ import { useDeferredValue, useState } from "react";
 import GameCard from "@/components/GameCard";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDiscordInviteStats } from "@/hooks/use-discord-invite-stats";
 import { useInfiniteScrollTrigger } from "@/hooks/use-infinite-scroll-trigger";
 import { getGames, getListings } from "@/lib/api";
 import { buildPageHead } from "@/lib/metadata";
 import type { Game, ListingSortBy, ListingType } from "@/types";
+import { extractDiscordInviteCode } from "@/utils/discord";
 
 export const Route = createFileRoute("/")({
 	head: () =>
@@ -132,6 +134,7 @@ function App() {
 	});
 
 	const listings = data?.pages.flat() ?? [];
+	const { data: discordStatsByCode } = useDiscordInviteStats(listings);
 	const setLoadMoreNode = useInfiniteScrollTrigger<HTMLDivElement>({
 		hasNextPage,
 		isFetchingNextPage,
@@ -265,7 +268,15 @@ function App() {
 								<ListingCardSkeleton key={id} />
 							))
 						: listings.map((listing) => (
-								<ListingCard key={listing.id} listing={listing} />
+								<ListingCard
+									key={listing.id}
+									listing={listing}
+									discordStats={
+										discordStatsByCode?.[
+											extractDiscordInviteCode(listing.discordInvite) ?? ""
+										]
+									}
+								/>
 							))}
 					{isFetchingNextPage && (
 						<div className="col-span-full text-center text-sm text-gray-400 py-4">

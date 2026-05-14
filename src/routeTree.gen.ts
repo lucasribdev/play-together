@@ -20,6 +20,7 @@ import { Route as ListingsSlugRouteImport } from './routes/listings.$slug'
 import { Route as GamesSlugRouteImport } from './routes/games.$slug'
 import { Route as ApiListingsRouteImport } from './routes/api/listings'
 import { Route as ApiGamesRouteImport } from './routes/api/games'
+import { Route as ApiDiscordInviteStatsRouteImport } from './routes/api/discord-invite-stats'
 import { Route as ApiProfileProfileFullNameRouteImport } from './routes/api/profile.$profileFullName'
 import { Route as ApiListingsSlugRouteImport } from './routes/api/listings.$slug'
 import { Route as ApiGamesSlugRouteImport } from './routes/api/games.$slug'
@@ -82,6 +83,11 @@ const ApiGamesRoute = ApiGamesRouteImport.update({
   path: '/api/games',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDiscordInviteStatsRoute = ApiDiscordInviteStatsRouteImport.update({
+  id: '/api/discord-invite-stats',
+  path: '/api/discord-invite-stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProfileProfileFullNameRoute =
   ApiProfileProfileFullNameRouteImport.update({
     id: '/api/profile/$profileFullName',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/games': typeof GamesRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
+  '/api/discord-invite-stats': typeof ApiDiscordInviteStatsRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/games/$slug': typeof GamesSlugRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/create-listing': typeof CreateListingRoute
   '/privacidade': typeof PrivacidadeRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
+  '/api/discord-invite-stats': typeof ApiDiscordInviteStatsRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/games/$slug': typeof GamesSlugRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/games': typeof GamesRouteWithChildren
   '/privacidade': typeof PrivacidadeRoute
   '/termos-de-uso': typeof TermosDeUsoRoute
+  '/api/discord-invite-stats': typeof ApiDiscordInviteStatsRoute
   '/api/games': typeof ApiGamesRouteWithChildren
   '/api/listings': typeof ApiListingsRouteWithChildren
   '/games/$slug': typeof GamesSlugRoute
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/privacidade'
     | '/termos-de-uso'
+    | '/api/discord-invite-stats'
     | '/api/games'
     | '/api/listings'
     | '/games/$slug'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/create-listing'
     | '/privacidade'
     | '/termos-de-uso'
+    | '/api/discord-invite-stats'
     | '/api/games'
     | '/api/listings'
     | '/games/$slug'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/privacidade'
     | '/termos-de-uso'
+    | '/api/discord-invite-stats'
     | '/api/games'
     | '/api/listings'
     | '/games/$slug'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRouteWithChildren
   PrivacidadeRoute: typeof PrivacidadeRoute
   TermosDeUsoRoute: typeof TermosDeUsoRoute
+  ApiDiscordInviteStatsRoute: typeof ApiDiscordInviteStatsRoute
   ApiGamesRoute: typeof ApiGamesRouteWithChildren
   ApiListingsRoute: typeof ApiListingsRouteWithChildren
   ListingsSlugRoute: typeof ListingsSlugRoute
@@ -321,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/api/games'
       fullPath: '/api/games'
       preLoaderRoute: typeof ApiGamesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/discord-invite-stats': {
+      id: '/api/discord-invite-stats'
+      path: '/api/discord-invite-stats'
+      fullPath: '/api/discord-invite-stats'
+      preLoaderRoute: typeof ApiDiscordInviteStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/profile/$profileFullName': {
@@ -424,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRouteWithChildren,
   PrivacidadeRoute: PrivacidadeRoute,
   TermosDeUsoRoute: TermosDeUsoRoute,
+  ApiDiscordInviteStatsRoute: ApiDiscordInviteStatsRoute,
   ApiGamesRoute: ApiGamesRouteWithChildren,
   ApiListingsRoute: ApiListingsRouteWithChildren,
   ListingsSlugRoute: ListingsSlugRoute,

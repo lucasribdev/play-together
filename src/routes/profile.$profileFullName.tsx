@@ -6,6 +6,7 @@ import ListingCard from "@/components/ListingCard";
 import UserAvatar from "@/components/UserAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { useDiscordInviteStats } from "@/hooks/use-discord-invite-stats";
 import { useInfiniteScrollTrigger } from "@/hooks/use-infinite-scroll-trigger";
 import {
 	getLikedListingsByUserId,
@@ -14,6 +15,7 @@ import {
 } from "@/lib/api";
 import { buildPageHead, truncateDescription } from "@/lib/metadata";
 import { getProfilePageData } from "@/lib/page-data";
+import { extractDiscordInviteCode } from "@/utils/discord";
 import { memberSince } from "@/utils/profile";
 
 export const Route = createFileRoute("/profile/$profileFullName")({
@@ -202,6 +204,10 @@ function Profile() {
 
 	const listings = listingsData?.pages.flat() ?? [];
 	const likedListings = likedListingsData?.pages.flat() ?? [];
+	const { data: discordStatsByCode } = useDiscordInviteStats([
+		...listings,
+		...likedListings,
+	]);
 	const isOwnProfile = Boolean(
 		session?.user?.id && profile?.id === session.user.id,
 	);
@@ -348,7 +354,17 @@ function Profile() {
 							? profileListingSkeletonIds.map((id) => (
 									<ListingCardSkeleton key={id} />
 								))
-							: listings?.map((l) => <ListingCard key={l.id} listing={l} />)}
+							: listings?.map((l) => (
+									<ListingCard
+										key={l.id}
+										listing={l}
+										discordStats={
+											discordStatsByCode?.[
+												extractDiscordInviteCode(l.discordInvite) ?? ""
+											]
+										}
+									/>
+								))}
 						{isFetchingNextListingsPage && (
 							<p className="text-sm text-gray-400 text-center py-4">
 								Carregando mais anúncios...
@@ -373,7 +389,15 @@ function Profile() {
 									<ListingCardSkeleton key={id} />
 								))
 							: likedListings?.map((l) => (
-									<ListingCard key={l.id} listing={l} />
+									<ListingCard
+										key={l.id}
+										listing={l}
+										discordStats={
+											discordStatsByCode?.[
+												extractDiscordInviteCode(l.discordInvite) ?? ""
+											]
+										}
+									/>
 								))}
 						{isFetchingNextLikedListingsPage && (
 							<p className="text-sm text-gray-400 text-center py-4">

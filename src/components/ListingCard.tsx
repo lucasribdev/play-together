@@ -8,11 +8,17 @@ import UserAvatar from "@/components/UserAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { toggleListingLike } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { Listing } from "@/types";
+import type { DiscordInviteStats, Listing } from "@/types";
 import { formatPostedAt } from "@/utils/date";
 import ListingTypeBadge from "./ListingTypeBadge";
 
-export default function ListingCard({ listing }: { listing: Listing }) {
+export default function ListingCard({
+	discordStats,
+	listing,
+}: {
+	discordStats?: DiscordInviteStats;
+	listing: Listing;
+}) {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const { session, isSessionLoading } = useAuth();
@@ -156,18 +162,31 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 				</div>
 				<div className="flex items-center gap-3">
 					<div
+						className="flex min-w-[74px] items-center gap-1 text-xs text-gray-500"
+						title={
+							discordStats?.approximatePresenceCount !== null &&
+							discordStats?.approximatePresenceCount !== undefined
+								? `${discordStats.approximatePresenceCount} online agora no Discord`
+								: "Carregando jogadores online no Discord"
+						}
+					>
+						<span
+							className={cn(
+								"size-2 rounded-full",
+								discordStats?.approximatePresenceCount === null ||
+									discordStats?.approximatePresenceCount === undefined
+									? "bg-gray-600"
+									: "bg-brand-primary",
+							)}
+						/>
+						{discordStats?.approximatePresenceCount ?? "--"} online
+					</div>
+					<div
 						className="flex items-center gap-1 text-xs text-gray-500"
 						title={`${listing.views} ${listing.views === 1 ? "visualização" : "visualizações"}`}
 					>
 						<Eye className="w-3 h-3" /> {listing.views}
 					</div>
-					{/* <div
-						className="flex items-center gap-1 text-xs text-gray-500"
-						title={`${listing.views} online agora`}
-					>
-						<Circle className="w-3 h-3 fill-brand-primary text-brand-primary" />{" "}
-						{listing.views}
-					</div> */}
 				</div>
 			</div>
 		</motion.div>

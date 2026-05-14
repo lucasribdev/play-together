@@ -9,6 +9,7 @@ import ListingTypeBadge from "@/components/ListingTypeBadge";
 import UserAvatar from "@/components/UserAvatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { useDiscordInviteStats } from "@/hooks/use-discord-invite-stats";
 import {
 	getListingBySlug,
 	incrementListingViews,
@@ -221,6 +222,9 @@ function ListingDetails() {
 			]);
 		},
 	});
+	const { data: discordStatsByCode } = useDiscordInviteStats(
+		listing ? [listing] : [],
+	);
 
 	if (isLoading) {
 		return <ListingDetailsSkeleton />;
@@ -231,6 +235,9 @@ function ListingDetails() {
 	}
 
 	const discordInviteUrl = normalizeDiscordInvite(listing.discordInvite ?? "");
+	const discordStats = discordInviteUrl
+		? Object.values(discordStatsByCode ?? {})[0]
+		: undefined;
 	const displayedViewsCount = viewsCount ?? listing.views;
 
 	const handleCopyIP = async () => {
@@ -337,6 +344,18 @@ function ListingDetails() {
 												: "visualizações"}
 										</span>
 									</div>
+									{discordStats?.approximatePresenceCount !== null &&
+										discordStats?.approximatePresenceCount !== undefined && (
+											<div
+												className="flex items-center gap-2 font-bold text-xs text-gray-400"
+												title={`${discordStats.approximatePresenceCount} online agora no Discord`}
+											>
+												<span className="size-2 rounded-full bg-brand-primary" />
+												<span>
+													{discordStats.approximatePresenceCount} online
+												</span>
+											</div>
+										)}
 
 									<button
 										type="button"

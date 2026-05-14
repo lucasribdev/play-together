@@ -8,11 +8,13 @@ import GameArtwork from "@/components/GameArtwork";
 import ListingCard from "@/components/ListingCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
+import { useDiscordInviteStats } from "@/hooks/use-discord-invite-stats";
 import { getGameBySlug, getListingsByGameId } from "@/lib/api";
 import { buildPageHead, truncateDescription } from "@/lib/metadata";
 import { getGamePageData } from "@/lib/page-data";
 import { cn } from "@/lib/utils";
 import type { ListingType } from "@/types";
+import { extractDiscordInviteCode } from "@/utils/discord";
 
 export const Route = createFileRoute("/games/$slug")({
 	loader: async ({ params }) => {
@@ -148,6 +150,10 @@ function GameDetails() {
 		queryFn: ({ signal }) => getListingsByGameId(game?.id ?? "", signal),
 		enabled: Boolean(game?.id),
 	});
+	const listings = game
+		? listingsData?.filter((l) => l.type === activeTab)
+		: [];
+	const { data: discordStatsByCode } = useDiscordInviteStats(listings ?? []);
 
 	if (isGameLoading) {
 		return <GameDetailsSkeleton />;
@@ -155,8 +161,6 @@ function GameDetails() {
 
 	if (!game)
 		return <div className="p-20 text-center">Jogo não encontrado.</div>;
-
-	const listings = listingsData?.filter((l) => l.type === activeTab);
 
 	const handleCreateListing = () => {
 		if (isSessionLoading) return;
@@ -268,7 +272,15 @@ function GameDetails() {
 								<ListingCardSkeleton key={id} />
 							))
 						: listings?.map((listing) => (
-								<ListingCard key={listing.id} listing={listing} />
+								<ListingCard
+									key={listing.id}
+									listing={listing}
+									discordStats={
+										discordStatsByCode?.[
+											extractDiscordInviteCode(listing.discordInvite) ?? ""
+										]
+									}
+								/>
 							))}
 					{!isListingsLoading && listings?.length === 0 && (
 						<div className="col-span-full py-20 text-center glass-panel">

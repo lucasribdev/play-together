@@ -44,6 +44,14 @@ export interface Listing {
 	updatedAt: string;
 }
 
+export interface DiscordInviteStats {
+	inviteCode: string;
+	approximatePresenceCount: number | null;
+	approximateMemberCount: number | null;
+	fetchedAt: string | null;
+	invalidAt: string | null;
+}
+
 export interface ListingByIdRpcRow {
 	id: string;
 	slug: string;

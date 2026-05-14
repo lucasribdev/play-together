@@ -24,18 +24,41 @@ function toUrl(value: string) {
 	}
 }
 
-export function isValidDiscordInvite(value: string) {
-	const url = toUrl(value);
-	if (!url) return false;
+export function extractDiscordInviteCode(value?: string | null) {
+	if (!value) return null;
 
-	return DISCORD_HOSTS.has(url.hostname.toLowerCase());
-}
-
-export function normalizeDiscordInvite(value: string) {
 	const url = toUrl(value);
 	if (!url || !DISCORD_HOSTS.has(url.hostname.toLowerCase())) {
 		return null;
 	}
 
-	return url.toString();
+	const pathParts = url.pathname.split("/").filter(Boolean);
+	const code =
+		url.hostname.toLowerCase().endsWith("discord.gg") ||
+		url.hostname.toLowerCase().endsWith("discordapp.com")
+			? pathParts[0]
+			: pathParts[0] === "invite"
+				? pathParts[1]
+				: null;
+
+	if (!code || !/^[a-zA-Z0-9_-]{2,100}$/.test(code)) {
+		return null;
+	}
+
+	return code;
+}
+
+export function isValidDiscordInvite(value: string) {
+	return Boolean(extractDiscordInviteCode(value));
+}
+
+export function normalizeDiscordInvite(value: string) {
+	const url = toUrl(value);
+	const code = extractDiscordInviteCode(value);
+
+	if (!url || !code) {
+		return null;
+	}
+
+	return `https://discord.gg/${code}`;
 }
